@@ -2,95 +2,155 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>PMP MOCK TEST - Question (with Chat & Mentor Filter)</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <title>PMP MOCK TEST</title>
   <style>
     body { background:#f4f4f4; font-size:15px;}
     .container {
       max-width:820px; margin:36px auto; background:#fff; border-radius:18px; box-shadow:0 6px 32px rgba(0,0,0,0.08);
-      padding:18px 18px 20px 18px; position:relative;
+      padding:18px 18px 20px 18px;
     }
-    /* ... [các style quiz giữ nguyên như các bản trước] ... */
-    #timer-controls { margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; gap:7px; background: #f9f6ef; border-radius: 8px; padding: 7px 12px; box-shadow: 0 1.5px 4px rgba(255,193,7,0.07); max-width: 520px; font-size: 1em;}
-    #timer-sandglass { font-size:1.28em; margin:0 3px 0 0; color: #ff9800; animation: sandmove 2s infinite linear; display:inline-block;}
-    @keyframes sandmove { 0%{transform:rotate(0deg);} 90%{transform:rotate(0deg);} 100%{transform:rotate(180deg);}}
+    .icon-main { text-align:center; margin-bottom:10px;}
+    .icon-main svg { vertical-align:middle; width:34px; height:34px; margin-right:6px;}
+    .icon-main span { font-size:1.1em; vertical-align:middle;}
+    .title { font-size:1.23em; font-weight:bold; margin-bottom:12px; text-align:center; letter-spacing:0.01em;}
+    .question-header-row { display:flex; align-items:center; justify-content:center; gap:18px; margin:18px 0 10px 0;}
+    .question-big { font-size:1.09em; font-weight:bold; color:#1976d2;}
+    .level-tag { font-size:1em; font-weight:bold; border-radius:5px; padding:5px 13px; margin-left:8px;}
+    .level-Easy { background:#43a047; color:#fff;}
+    .level-Moderate { background:#fbc02d; color:#fff;}
+    .level-Difficult { background:#d32f2f; color:#fff;}
+    .level-Expert { background:#8e24aa; color:#fff;}
+    .summary-row { color:#666; font-size:1em; margin-bottom:11px; font-weight:bold;}
+    .question-main { font-size:1em; margin-bottom:18px; font-weight:400;}
+    .answers { margin-bottom:20px;}
+    .answer-label { display:block; margin-bottom:13px; font-size:1em; font-weight:400;}
+    .answer-label input[type="radio"], .answer-label input[type="checkbox"] { margin-right:10px; }
+    .hint-row { margin-bottom:13px;}
+    .hint-btn {
+      font-size:0.95em; color:#1976d2; background:#e3f2fd; border:none; border-radius:7px; padding:6px 14px; margin-right:0; cursor:pointer;
+      font-weight:500; box-shadow:0 1px 1.5px rgba(33,150,243,0.08);
+      transition: background 0.2s;
+      display:inline-block;
+    }
+    .hint-btn:hover { background:#bbdefb; }
+    .answer-row { display:flex; align-items:center; margin-top:14px; margin-bottom:15px; gap:30px;}
+    .answer-btn {
+      background:#1976d2; color:#fff; border:none; border-radius:7px; font-size:1em; font-weight:600;
+      padding:8px 26px; cursor:pointer; transition:background 0.2s; display:inline-block;
+    }
+    .answer-btn:hover { background:#0d47a1;}
+    .toggle-explanation-link {
+      color:#1976d2; background:none; border:none; font-size:1em; font-weight:bold;
+      cursor:pointer; text-decoration:underline; margin-left:6px;
+    }
+    .toggle-explanation-link:hover { color:#0d47a1; }
+    .status { font-weight:bold; display:inline-block; margin-left:18px; padding:2px 18px; border-radius:18px; font-size:1em;}
+    .correct { background:#388e3c; color:#fff;}
+    .incorrect { background:#fbc02d; color:#000;}
+    .explanation { background:#fffde7; border-left:4px solid #fbc02d; padding:11px 14px; margin-top:12px; font-size:0.98em;}
+    .correct-answer { color:#388e3c; font-weight:bold;}
+    .reference { color:#6a1b9a; background:#ede7f6; display:inline-block; border-radius:6px; padding:3px 10px; font-size:0.95em; margin-bottom:8px; margin-top:4px;}
+    .explanation-en { font-style:italic; color:#1976d2; margin-bottom:8px; margin-top:6px; }
+    .explanation-vi { color:#222; margin-bottom:5px;}
+    .action-buttons-row { display:flex; align-items:center; justify-content:space-between; margin-top:18px;}
+    .pagination-controls { display:flex; align-items:center; gap:6px; }
+    .pagination-page { font-size:1em; font-weight:bold; color:#1976d2; min-width:44px; text-align:center; }
+    .nav-btn, .first-btn, .last-btn {
+      padding:7px 14px; font-size:1em; border-radius:5px; border:none; font-weight:600;
+      cursor:pointer; min-width:36px; margin-right:4px;
+    }
+    .nav-btn { background:#616161; color:#fff;}
+    .first-btn, .last-btn { background:#2196f3; color:#fff;}
+    .nav-btn:disabled, .first-btn:disabled, .last-btn:disabled { background:#bbb; color:#fff;}
+    .list-btn {
+      background:#388e3c; color:#fff; padding:8px 24px; border:none; border-radius:5px; font-size:1em; font-weight:600; cursor:pointer; margin-right:8px;
+    }
+    .end-btn {
+      background:#d32f2f; color:#fff; padding:8px 24px; border:none; border-radius:5px; font-size:1em; font-weight:600; cursor:pointer;
+    }
+    .highlight-correct { background: #c8e6c9; font-weight: bold;}
+    .highlight-incorrect { background: #fffde7; font-weight: bold;}
+    /* TIMER nhỏ gọn 1 dòng */
+    #timer-controls { 
+      margin: 0 auto 16px auto; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap:7px;
+      background: #f9f6ef;
+      border-radius: 8px;
+      padding: 7px 12px;
+      box-shadow: 0 1.5px 4px rgba(255,193,7,0.07);
+      max-width: 520px;
+      font-size: 1em;
+    }
+    #timer-sandglass {
+      font-size:1.28em; 
+      margin:0 3px 0 0;
+      color: #ff9800;
+      animation: sandmove 2s infinite linear;
+      display:inline-block;
+    }
+    @keyframes sandmove {
+      0%   {transform:rotate(0deg);}
+      90%  {transform:rotate(0deg);}
+      100% {transform:rotate(180deg);}
+    }
     #timer-controls label {font-weight:500; margin:0;}
-    #timer-controls input[type="number"] { width:30px; border-radius:3px; border:1px solid #ccc; font-size:1em; padding:1px 2px; margin:0 0 0 3px;}
-    #start-timer, #reset-timer { background: #1976d2; color: #fff; border: none; border-radius: 6px; padding: 5px 13px; font-weight: bold; font-size: 0.97em; cursor:pointer; transition:background 0.16s; margin-left: 0;}
+    #timer-controls input[type="number"] {
+      width:30px;
+      border-radius:3px;
+      border:1px solid #ccc;
+      font-size:1em;
+      padding:1px 2px;
+      margin:0 0 0 3px;
+    }
+    #start-timer, #reset-timer {
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 13px;
+      font-weight: bold;
+      font-size: 0.97em;
+      cursor:pointer;
+      transition:background 0.16s;
+      margin-left: 0;
+    }
     #start-timer:hover, #reset-timer:hover { background: #0d47a1;}
     #reset-timer { background:#bbb; color:#222; }
     #timer-display { font-size:1.09em; margin-left:3px; font-weight:bold; color:#1976d2;}
-    #clear-answer-row { display: flex; justify-content: center; margin: 16px 0 0 0;}
-    #clear-answer { background:#ffe082; color:#444; border:none; border-radius:8px; font-size:1em; font-weight:600; padding:8px 18px 8px 14px; cursor:pointer; box-shadow:0 2px 6px rgba(255,193,7,0.11); display: flex; align-items: center; gap:7px; transition: background 0.2s;}
-    #clear-answer:hover { background:#ffd54f; color:#222;}
-    #clear-icon { font-size: 1.2em;}
-    @media (max-width: 950px) { .container {max-width:99vw; padding:2vw;} #timer-controls {max-width:95vw;} }
-    /* CHAT */
-    #chat-btn-open {
-      position:fixed; bottom:30px; right:35px;
-      background: #1976d2; color:#fff; border:none; border-radius:50%; width:46px; height:46px;
-      font-size:2em; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 14px rgba(33,150,243,0.13);
-      z-index:1011; transition: background 0.18s;
+    /* Clear Button style */
+    #clear-answer-row {
+      display: flex;
+      justify-content: center;
+      margin: 16px 0 0 0;
     }
-    #chat-btn-open:hover { background: #388e3c;}
-    #chat-box {
-      display:none; flex-direction:column;
-      position:fixed; bottom:60px; right:30px; z-index:1001;
-      width:350px; max-width:96vw; height:440px; background:#fff;
-      border-radius:14px; box-shadow:0 8px 44px rgba(25,118,210,0.16);
-      border:1.5px solid #1976d2; animation:openchat 0.18s;
-      transition:height 0.15s;
+    #clear-answer {
+      background:#ffe082;
+      color:#444;
+      border:none;
+      border-radius:8px;
+      font-size:1em;
+      font-weight:600;
+      padding:8px 18px 8px 14px;
+      cursor:pointer;
+      box-shadow:0 2px 6px rgba(255,193,7,0.11);
+      display: flex;
+      align-items: center;
+      gap:7px;
+      transition: background 0.2s;
     }
-    @keyframes openchat { 0%{transform:scale(0.6); opacity:0;} 100%{transform:scale(1); opacity:1;}}
-    #chat-header {background:#1976d2; color:#fff; border-radius:14px 14px 0 0; padding:11px 18px 8px 18px; font-weight:bold; display:flex; align-items:center; justify-content:space-between;}
-    #chat-header-title { font-size:1.08em;}
-    #chat-box-close {
-      background:#fff; border:none; color:#d32f2f; font-size:1.15em; cursor:pointer; border-radius:50%; width:28px; height:28px; line-height:1; text-align:center; box-shadow:0 0 2px #bbb;
-      margin-left:8px;
+    #clear-answer:hover {
+      background:#ffd54f;
+      color:#222;
     }
-    #chat-box-close:hover { background:#ffd5d5; color:#b71c1c;}
-    #chat-login-area, #chat-main-area { padding:13px 14px 10px 14px;}
-    #chat-login-area label { display:block; margin:7px 0 3px 0;}
-    #chat-username { width:85%; padding:7px; border-radius:7px; border:1px solid #bbb; margin-bottom:8px;}
-    #chat-login-btn { margin-top:9px; background:#43a047; color:#fff; border:none; border-radius:6px; font-size:1em; font-weight:600; padding:7px 18px; cursor:pointer;}
-    #chat-logout-btn {
-      background:#d32f2f; color:#fff; border:none; border-radius:50%; width:21px; height:21px; font-size:0.98em; font-weight:bold; margin-left:8px; margin-bottom:0;
-      display:flex;align-items:center;justify-content:center;
-      min-width:0; min-height:0;
+    #clear-icon {
+      font-size: 1.2em;
     }
-    #chat-logout-btn:hover { background:#b71c1c;}
-    #chat-to-select { width:98%; padding:6px 6px 6px 10px; border-radius:5px; border:1px solid #ccc; margin-bottom:9px;}
-    #chat-msgs { background:#f8fafb; border-radius:7px; height:220px; overflow-y:auto; padding:8px 7px 8px 7px; margin-bottom:7px; font-size:0.99em;}
-    .chat-msg-you { text-align:right; margin:7px 0;}
-    .chat-msg-you .chat-msg-bubble {background:#bbdefb; color:#1976d2;}
-    .chat-msg-other { text-align:left; margin:7px 0;}
-    .chat-msg-other .chat-msg-bubble {background:#f1f8e9; color:#222;}
-    .chat-msg-bubble { display:inline-block; padding:6px 13px; border-radius:14px; max-width:81%; word-break:break-word; margin-bottom:2px; font-size:1em;}
-    .chat-msg-username { font-size:0.93em; color:#888; margin-bottom:2px; }
-    #chat-msg-form { display:flex; align-items:center; margin-top:7px; position:relative;}
-    #chat-msg-input { flex:1; padding:7px; border-radius:7px; border:1px solid #bbb; font-size:1em;}
-    #chat-msg-send { background:#1976d2; color:#fff; border:none; border-radius:6px; padding:7px 15px; font-weight:600; margin-left:7px; font-size:1em; cursor:pointer;}
-    #chat-emoji-toggle { background:none; border:none; font-size:1.3em; cursor:pointer; margin-left:6px;}
-    #chat-emoji-list {
-      display:none; position:absolute; bottom:45px; right:65px; background:#fff; border:1px solid #ccc; border-radius:10px; box-shadow:0 2px 16px #ccc;
-      z-index:2000; padding:7px 9px; min-width:160px; text-align:center;
-    }
-    #chat-emoji-list button {
-      border:none; background:none; font-size:1.42em; margin:2px 4px; cursor:pointer; border-radius:7px; padding:2px 2px;
-      transition:background .14s;
-    }
-    #chat-emoji-list button:hover { background:#eeeeee;}
-    #chat-user-list { font-size:0.98em; margin-bottom:7px;}
-    #chat-user-list b { color:#43a047;}
-    #chat-info {color:#d32f2f; font-size:0.97em; margin:7px 0 0 0;}
-    #chat-privatemsg { background:#ffd54f; color:#333; border:none; border-radius:6px; padding:4px 10px; font-size:0.95em; font-weight:600; margin-left:7px; cursor:pointer;}
-    #chat-privatemsg.active { background:#ff9800; color:#fff;}
-    @media (max-width: 600px) {
-      #chat-box {width:99vw; right:1vw; bottom:0; max-height:75vh;}
-      #chat-main-area, #chat-login-area {padding:10px 4vw;}
-      #chat-emoji-list {right:8vw;}
-      #chat-msgs {height:30vh;}
+    @media (max-width: 950px) {
+      .container {max-width:99vw; padding:2vw;}
+      #timer-controls {max-width:95vw;}
     }
   </style>
 </head>
@@ -101,6 +161,8 @@
       <span>📚</span>
     </div>
     <div class="title">PMP MOCK TEST</div>
+    
+    <!-- TIMER nhỏ gọn 1 dòng -->
     <div id="timer-controls">
       <span id="timer-sandglass">⏳</span>
       <label>
@@ -111,6 +173,7 @@
       <button id="reset-timer" type="button">Reset</button>
       <span id="timer-display">01:00</span>
     </div>
+
     <div class="question-header-row">
       <span class="question-big" id="question-number"></span>
       <span class="level-tag" id="question-level"></span>
@@ -118,18 +181,25 @@
     <div class="summary-row" id="question-summary"></div>
     <div class="question-main" id="question-main"></div>
     <form id="answers" class="answers"></form>
+    <div class="hint-row">
+      <button class="hint-btn" id="hint-btn">HINT: Ask ChatGPT</button>
+    </div>
     <div class="answer-row">
       <button class="answer-btn" id="answer-btn">ANSWER</button>
       <button class="toggle-explanation-link" id="toggle-explanation" type="button">+ Show answer & explanation</button>
       <span id="status" class="status"></span>
     </div>
     <div id="explanation" class="explanation" style="display:none;"></div>
+    
+    <!-- CLEAR/RESET ANSWER - dưới cùng ngay trên phân trang -->
     <div id="clear-answer-row">
       <button id="clear-answer" type="button">
         <span id="clear-icon">🧹</span> 
         Clear/Reset Answer
       </button>
     </div>
+    <!-- END CLEAR -->
+
     <div class="action-buttons-row">
       <div class="pagination-controls">
         <button class="first-btn" id="btn-first">&laquo;</button>
@@ -144,76 +214,12 @@
       </div>
     </div>
   </div>
-  <!-- CHAT -->
-  <button id="chat-btn-open" title="Tương tác online">&#128172;</button>
-  <div id="chat-box">
-    <div id="chat-header">
-      <span id="chat-header-title">💬 Online Chat</span>
-      <button id="chat-logout-btn" title="Thoát">&#10060;</button>
-      <button id="chat-box-close" title="Đóng">&#10006;</button>
-    </div>
-    <div id="chat-login-area">
-      <label>Nhập tên của bạn:</label>
-      <input type="text" id="chat-username" maxlength="20" placeholder="Tên (không trùng)">
-      <button id="chat-login-btn">Vào phòng chat</button>
-      <div id="chat-info"></div>
-    </div>
-    <div id="chat-main-area" style="display:none;">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div id="chat-user-list"></div>
-        <button id="chat-privatemsg" style="display:none;">PrivateMsgMentor</button>
-      </div>
-      <select id="chat-to-select">
-        <option value="__all__">💡 Nhóm chung (tất cả)</option>
-      </select>
-      <div id="chat-msgs"></div>
-      <form id="chat-msg-form" autocomplete="off">
-        <input id="chat-msg-input" type="text" maxlength="250" placeholder="Nhập tin nhắn...">
-        <button id="chat-emoji-toggle" type="button" tabindex="-1">😊</button>
-        <div id="chat-emoji-list">
-          <button type="button">😀</button>
-          <button type="button">😁</button>
-          <button type="button">😂</button>
-          <button type="button">🤣</button>
-          <button type="button">😊</button>
-          <button type="button">😍</button>
-          <button type="button">😎</button>
-          <button type="button">😢</button>
-          <button type="button">😭</button>
-          <button type="button">👍</button>
-          <button type="button">🙏</button>
-          <button type="button">👏</button>
-          <button type="button">💪</button>
-          <button type="button">❤️</button>
-        </div>
-        <button id="chat-msg-send" type="submit">Gửi</button>
-      </form>
-    </div>
-  </div>
-  <!-- END CHAT -->
-
   <script>
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyBQ2HWP1l7SIz3FyQaNz37xEgXiDAStnCs",
-      authDomain: "pmptraining-ad18c.firebaseapp.com",
-      databaseURL: "https://pmptraining-ad18c-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "pmptraining-ad18c",
-      storageBucket: "pmptraining-ad18c.appspot.com",
-      messagingSenderId: "595622352594",
-      appId: "1:595622352594:web:1e835cc6fadf45ceedff0b",
-      measurementId: "G-9FXNTLV9VV"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    // === QUIZ LOGIC (như trước) ===
-    // [Quiz JS giữ nguyên như đã gửi ở các bản trước, không lặp lại ở đây để tiết kiệm chỗ] 
-
-    // === TIMER ===
+    // TIMER LOGIC
     let timerInterval = null;
     let remainingTime = 60;
     let timerIsActive = false;
+
     function displayTimer(sec) {
       let m = Math.floor(sec/60).toString().padStart(2,'0');
       let s = (sec%60).toString().padStart(2,'0');
@@ -224,7 +230,9 @@
       let s = parseInt(document.getElementById('seconds').value) || 0;
       remainingTime = m*60 + s;
       if (remainingTime <= 0) return;
-      if(timerIsActive) { clearInterval(timerInterval); }
+      if(timerIsActive) {
+        clearInterval(timerInterval);
+      }
       displayTimer(remainingTime);
       timerIsActive = true;
       timerInterval = setInterval(()=>{
@@ -247,234 +255,479 @@
     }
     document.getElementById('start-timer').onclick = startCountdown;
     document.getElementById('reset-timer').onclick = resetTimer;
-    window.addEventListener('DOMContentLoaded', ()=>{ resetTimer(); });
+    window.addEventListener('DOMContentLoaded', ()=>{
+      resetTimer();
+    });
 
-    // === CHAT UI ===
-    const chatBox = document.getElementById('chat-box');
-    const chatBtnOpen = document.getElementById('chat-btn-open');
-    const chatBoxClose = document.getElementById('chat-box-close');
-    const chatLoginArea = document.getElementById('chat-login-area');
-    const chatMainArea = document.getElementById('chat-main-area');
-    const chatUsernameInput = document.getElementById('chat-username');
-    const chatLoginBtn = document.getElementById('chat-login-btn');
-    const chatLogoutBtn = document.getElementById('chat-logout-btn');
-    const chatPrivMsgBtn = document.getElementById('chat-privatemsg');
-    const chatToSelect = document.getElementById('chat-to-select');
-    const chatMsgs = document.getElementById('chat-msgs');
-    const chatMsgForm = document.getElementById('chat-msg-form');
-    const chatMsgInput = document.getElementById('chat-msg-input');
-    const chatUserList = document.getElementById('chat-user-list');
-    const chatInfo = document.getElementById('chat-info');
-    const chatEmojiToggle = document.getElementById('chat-emoji-toggle');
-    const chatEmojiList = document.getElementById('chat-emoji-list');
-    let myUsername = null, userRef = null;
-    let allUsers = {};
-    let allMsgs = [];
-    let chatListener = null, userListener = null;
-    let mentorFilterActive = false;
-    let mentorFilterTime = null;
-
-    // Chat toggle bằng nút
-    chatBtnOpen.onclick = function(){ chatBox.style.display = (chatBox.style.display==='flex'?'none':'flex'); }
-    chatBoxClose.onclick = function(){ chatBox.style.display="none"; }
-    chatLogoutBtn.onclick = function() {
-      if (myUsername && userRef) {
-        userRef.remove();
-        myUsername = null;
-        chatLoginArea.style.display="";
-        chatMainArea.style.display="none";
-        chatInfo.textContent='';
-        chatUsernameInput.value='';
-        chatMsgs.innerHTML = '';
-        chatToSelect.value="__all__";
-        mentorFilterActive = false; mentorFilterTime = null;
-        chatPrivMsgBtn.style.display='none';
-        chatPrivMsgBtn.classList.remove('active');
+    // CLEAR/RESET ANSWER LOGIC
+    document.getElementById('clear-answer').onclick = function() {
+      document.querySelectorAll('input[type=radio][name="q'+current+'"],input[type=checkbox][name="q'+current+'"]').forEach(el=>{
+        el.checked = false;
+        el.disabled = false;
+      });
+      userAnswers[current] = (getMultiCount(questions[current].question, questions[current].options) > 1) ? [] : null;
+      checked[current] = false;
+      localStorage.setItem('pmp_userAnswers', JSON.stringify(userAnswers));
+      localStorage.setItem('pmp_checked', JSON.stringify(checked));
+      document.getElementById('status').textContent = "";
+      document.getElementById('status').className = "status";
+      document.getElementById("toggle-explanation").innerHTML = "+ Show answer & explanation";
+      document.getElementById("explanation").style.display = "none";
+      showExplanation[current] = false;
+      let q = questions[current];
+      if(q && q.options) {
+        for (let i = 0; i < q.options.length; i++) {
+          let lbl = document.getElementById('label'+i);
+          if(lbl) lbl.classList.remove("highlight-correct","highlight-incorrect");
+        }
+      }
+      let multiCount = getMultiCount(questions[current].question, questions[current].options);
+      if(multiCount > 1){
+        let boxes = document.querySelectorAll('input[type=checkbox][name="q'+current+'"]');
+        boxes.forEach(box=>{ box.disabled = false; });
       }
     };
-    // Emoji: mở/đóng popup
-    chatEmojiToggle.onclick = function(e){
-      e.preventDefault();
-      chatEmojiList.style.display = (chatEmojiList.style.display==="block") ? "none" : "block";
+
+    // ----------- LOGIC GỐC -----------
+    let questions = [];
+    let current = 0;
+    let userAnswers = [];
+    let checked = [];
+    let showExplanation = [];
+    function levelTag(level) {
+      let txt = level || "Moderate";
+      let className = "level-" + txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase();
+      return `<span class="level-tag ${className}">${txt}</span>`;
+    }
+    function getMultiCount(text, options) {
+      let lower = text.toLowerCase();
+      let m = lower.match(/choose\s+(two|three|four|five|\d+|all)/) ||
+              lower.match(/select\s+(two|three|four|five|\d+|all)/) ||
+              lower.match(/(pick|mark)\s+(two|three|four|five|\d+|all)/);
+      if (m) {
+        let val = m[1] || m[2];
+        if (val === "two") return 2;
+        if (val === "three") return 3;
+        if (val === "four") return 4;
+        if (val === "five") return 5;
+        if (val === "all") return options ? options.length : 2;
+        if (!isNaN(val)) return Number(val);
+      }
+      return 1;
+    }
+    function renderQuestion() {
+      const q = questions[current];
+      let multiCount = getMultiCount(q.question, q.options);
+      document.getElementById("question-number").textContent = `Question#${current+1}`;
+      document.getElementById("question-level").innerHTML = levelTag(q.difficulty);
+      document.getElementById("question-summary").innerHTML = `<b>Summary:</b> ${q.short||""}`;
+      document.getElementById("question-main").innerHTML = q.question.replace(/\n/g,'<br>');
+      let ansHtml = "";
+      if (multiCount > 1) {
+        let arr = Array.isArray(userAnswers[current]) ? userAnswers[current] : [];
+        q.options.forEach((option, i) => {
+          ansHtml += `<label class="answer-label" id="label${i}">
+            <input type="checkbox" name="q${current}" value="${i}" ${(arr.includes(i)) ? 'checked' : ''} ${checked[current] ? 'disabled' : ''} onchange="updateMultiAnswer(${i})">
+            ${String.fromCharCode(65+i)}. ${option}
+          </label>`;
+        });
+      } else {
+        q.options.forEach((option, i) => {
+          ansHtml += `<label class="answer-label" id="label${i}">
+            <input type="radio" name="q${current}" value="${i}" ${userAnswers[current] == i ? 'checked' : ''} ${checked[current] ? 'disabled' : ''} onchange="updateSingleAnswer(${i})">
+            ${String.fromCharCode(65+i)}. ${option}
+          </label>`;
+        });
+      }
+      document.getElementById("answers").innerHTML = ansHtml;
+      document.getElementById("status").textContent = "";
+      document.getElementById("toggle-explanation").innerHTML = "+ Show answer & explanation";
+      document.getElementById("explanation").style.display = showExplanation[current] ? "block" : "none";
+      let expHtml = "";
+      if (multiCount > 1 && Array.isArray(q.correct)) {
+        expHtml = `<span class="correct-hint">Đáp án đúng</span>: <span class="correct-answer">${q.correct.map(idx=>String.fromCharCode(65+idx)+'. '+q.options[idx]).join(', ')}</span><br>`;
+      } else {
+        expHtml = `<span class="correct-hint">Đáp án đúng</span>: <span class="correct-answer">${String.fromCharCode(65+q.correct)}. ${q.options[q.correct]}</span><br>`;
+      }
+      if(q.reference) expHtml += `<span class="reference">Tham khảo: ${q.reference.replace(/\n/g,"<br>")}</span><br>`;
+      if(q.explanation_en) expHtml += `<div class="explanation-en">Giải thích EN: ${q.explanation_en.replace(/\n/g,"<br>")}</div>`;
+      if(q.explanation_vi) expHtml += `<div class="explanation-vi">Giải thích Vi: ${q.explanation_vi.replace(/\n/g,"<br>")}</div>`;
+      document.getElementById("explanation").innerHTML = expHtml;
+      document.getElementById("page-label").textContent = `${current+1} / ${questions.length}`;
+      document.getElementById("btn-first").disabled = current===0;
+      document.getElementById("btn-prev").disabled = current===0;
+      document.getElementById("btn-next").disabled = current===questions.length-1;
+      document.getElementById("btn-last").disabled = current===questions.length-1;
+      if(checked[current]) showCheckResult();
+    }
+    // Nhận đáp án radio (1 lựa chọn)
+    window.updateSingleAnswer = function(i) {
+      userAnswers[current] = i;
+      localStorage.setItem('pmp_userAnswers', JSON.stringify(userAnswers));
     };
-    document.addEventListener('click', function(e){
-      if (!chatEmojiList.contains(e.target) && e.target!==chatEmojiToggle) {
-        chatEmojiList.style.display = "none";
+    // Nhận đáp án checkbox (nhiều lựa chọn)
+    window.updateMultiAnswer = function(i) {
+      let arr = Array.isArray(userAnswers[current]) ? userAnswers[current] : [];
+      let checkbox = document.querySelector('input[type=checkbox][name="q'+current+'"][value="'+i+'"]');
+      if (checkbox.checked) {
+        if (!arr.includes(i)) arr.push(i);
+      } else {
+        arr = arr.filter(x=>x!==i);
       }
-    });
-    chatEmojiList.querySelectorAll('button').forEach(btn=>{
-      btn.onclick = function(e){
-        e.preventDefault();
-        chatMsgInput.value += this.textContent;
-        chatMsgInput.focus();
-        chatEmojiList.style.display = "none";
-      }
-    });
-    // Đăng nhập
-    chatLoginBtn.onclick = function() {
-      let name = chatUsernameInput.value.trim();
-      if (!name) { chatInfo.textContent="Nhập tên!"; return; }
-      if (/[^a-zA-Z0-9_.-]/.test(name)) { chatInfo.textContent="Chỉ dùng chữ, số, gạch dưới, dấu chấm, gạch ngang!"; return; }
-      chatLoginBtn.disabled = true;
-      db.ref('pmpchat/users/'+name).once('value', snap=>{
-        if (snap.val()) {
-          chatInfo.textContent="Tên này đã có người dùng!"; chatLoginBtn.disabled=false;
+      userAnswers[current] = arr;
+      localStorage.setItem('pmp_userAnswers', JSON.stringify(userAnswers));
+      // Cấm tick thêm nếu đủ số lượng
+      const q = questions[current];
+      let multiCount = getMultiCount(q.question, q.options);
+      let boxes = document.querySelectorAll('input[type=checkbox][name="q'+current+'"]');
+      boxes.forEach(box=>{
+        if(!arr.includes(Number(box.value)) && arr.length>=multiCount){
+          box.disabled = true;
         } else {
-          myUsername = name;
-          userRef = db.ref('pmpchat/users/'+myUsername);
-          userRef.set({online:true, t:Date.now()});
-          userRef.onDisconnect().remove();
-          chatLoginArea.style.display="none";
-          chatMainArea.style.display="";
-          chatInfo.textContent="";
-          listenUsers();
-          listenMsgs();
-          updateUserListUI();
-          // Show mentor chức năng nếu là mentor
-          if(/^Mentor_/.test(myUsername)) chatPrivMsgBtn.style.display = '';
-          else chatPrivMsgBtn.style.display = 'none';
+          box.disabled = false;
         }
       });
     };
-    function listenUsers() {
-      if (userListener) db.ref('pmpchat/users').off('value', userListener);
-      userListener = db.ref('pmpchat/users').on('value', snap=>{
-        allUsers = snap.val()||{};
-        updateUserListUI();
-        updateCombo();
-      });
-    }
-    function updateUserListUI() {
-      let arr = Object.keys(allUsers||{}).sort();
-      chatUserList.innerHTML = arr.length
-        ? '<b>Online:</b> ' + arr.map(n=>n===myUsername?`<span style="color:#1976d2">${n}</span>`:n).join(', ')
-        : '<span style="color:#d32f2f">Không có ai online</span>';
-    }
-    function updateCombo() {
-      let val = chatToSelect.value;
-      chatToSelect.innerHTML = '<option value="__all__">💡 Nhóm chung (tất cả)</option>';
-      let arr = Object.keys(allUsers||{}).sort().filter(n=>n!==myUsername);
-      arr.forEach(n=>{
-        chatToSelect.innerHTML += `<option value="${n}">👤 ${n}</option>`;
-      });
-      if (arr.length>=2) {
-        chatToSelect.innerHTML += `<option value="__group__">👥 Nhóm nhỏ tuỳ chọn</option>`;
+    function showCheckResult() {
+      const q = questions[current];
+      const multiCount = getMultiCount(q.question, q.options);
+      const status = document.getElementById('status');
+      for (let i = 0; i < q.options.length; i++) {
+        document.getElementById('label'+i).classList.remove("highlight-correct","highlight-incorrect");
       }
-      chatToSelect.value = val;
-    }
-    function listenMsgs() {
-      if (chatListener) db.ref('pmpchat/msgs').off('value', chatListener);
-      chatListener = db.ref('pmpchat/msgs').on('value', snap=>{
-        allMsgs = [];
-        snap.forEach(child=>{ allMsgs.push(child.val()); });
-        renderChatMsgs();
-      });
-    }
-    chatMsgForm.onsubmit = function(e){
-      e.preventDefault();
-      let to = chatToSelect.value;
-      let content = chatMsgInput.value.trim();
-      if (!content) return;
-      let msg = {
-        from: myUsername,
-        to: to,
-        content: content,
-        t: Date.now(),
-        mentorFilterActive: mentorFilterActive ? true : undefined,
-        mentorFilterTime: mentorFilterActive ? Date.now() : undefined
-      };
-      if (to==="__group__") {
-        let group = prompt("Nhập tên các thành viên nhóm, phân cách bởi dấu phẩy (,), VD: user1,user2,user3 (bao gồm cả bạn nếu muốn)");
-        if (!group) return;
-        let names = group.split(',').map(s=>s.trim()).filter(Boolean);
-        names.forEach(u=>{
-          let m2 = {...msg, to:u};
-          db.ref('pmpchat/msgs').push(m2);
-        });
-      } else if (to==="__all__") {
-        db.ref('pmpchat/msgs').push(msg);
+      let correct = (multiCount > 1 && Array.isArray(q.correct)) ? q.correct : [q.correct];
+      let chosen = (multiCount > 1) ? (Array.isArray(userAnswers[current]) ? userAnswers[current] : []) : [userAnswers[current]];
+      let isCorrect = false;
+      if (multiCount > 1) {
+        isCorrect = Array.isArray(q.correct) && chosen.length === q.correct.length &&
+          q.correct.every(idx=>chosen.includes(idx));
       } else {
-        db.ref('pmpchat/msgs').push(msg);
+        isCorrect = chosen[0] === correct[0];
       }
-      chatMsgInput.value="";
+      if (isCorrect) {
+        status.textContent = "CORRECT";
+        status.className = "status correct";
+        correct.forEach(idx=>{
+          document.getElementById('label'+idx).classList.add("highlight-correct");
+        });
+      } else {
+        status.textContent = "INCORRECT";
+        status.className = "status incorrect";
+        chosen.forEach(idx=>{
+          if(idx!=null)document.getElementById('label'+idx).classList.add("highlight-incorrect");
+        });
+        correct.forEach(idx=>{
+          document.getElementById('label'+idx).classList.add("highlight-correct");
+        });
+      }
+      let inputs = document.querySelectorAll('.answers input');
+      for (let i = 0; i < inputs.length; i++) inputs[i].disabled = true;
+    }
+    document.getElementById("answer-btn").onclick = function(e) {
+      const q = questions[current];
+      let multiCount = getMultiCount(q.question, q.options);
+      if (checked[current]) return;
+      let status = document.getElementById('status');
+      if (multiCount > 1) {
+        let boxes = document.querySelectorAll('input[type=checkbox][name="q'+current+'"]');
+        let arr = [];
+        boxes.forEach(b=>{ if(b.checked) arr.push(Number(b.value)); });
+        if (arr.length < multiCount) {
+          status.textContent = `Please choose ${multiCount} answers!`;
+          status.className = "status";
+          return;
+        }
+        userAnswers[current] = arr;
+      } else {
+        let radios = document.getElementsByName('q'+current);
+        let chosen = null;
+        for (let i = 0; i < radios.length; i++) {
+          if (radios[i].checked) { chosen = parseInt(radios[i].value); break; }
+        }
+        if (chosen === null) {
+          status.textContent = "Please choose an answer!";
+          status.className = "status";
+          return;
+        }
+        userAnswers[current] = chosen;
+      }
+      checked[current] = true;
+      showCheckResult();
+      localStorage.setItem('pmp_userAnswers', JSON.stringify(userAnswers));
+      localStorage.setItem('pmp_checked', JSON.stringify(checked));
     };
-
-    // PrivateMsgMentor
-    chatPrivMsgBtn.onclick = function(){
-      mentorFilterActive = !mentorFilterActive;
-      if (mentorFilterActive) {
-        mentorFilterTime = Date.now();
-        chatPrivMsgBtn.classList.add('active');
-        // Gửi thông báo đặc biệt để các client ẩn message user thường từ thời điểm này
-        db.ref('pmpchat/msgs').push({
-          from: myUsername,
-          to: "__all__",
-          content: "[Mentor đã bật chế độ PrivateMsgMentor. Các user khác sẽ chỉ thấy tin nhắn Mentor_ từ thời điểm này.]",
-          t: mentorFilterTime,
-          mentorFilterActive: true,
-          mentorFilterTime: mentorFilterTime
+    document.getElementById("toggle-explanation").onclick = function() {
+      showExplanation[current] = !showExplanation[current];
+      document.getElementById("explanation").style.display = showExplanation[current] ? "block" : "none";
+      this.innerHTML = showExplanation[current] ? "- Hide answer & explanation" : "+ Show answer & explanation";
+    };
+    document.getElementById("hint-btn").onclick = function() {
+      const q = questions[current];
+      let prompt = `Phân tích câu hỏi PMP sau, giải thích chi tiết bằng tiếng Việt và lý do chọn, không chọn từng đáp án.\n\nCâu hỏi:\n${q.question}\n\nCác đáp án:\n${q.options.map((opt, i)=>String.fromCharCode(65+i)+'. '+opt).join('\n')}`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(prompt).then(function() {
+          window.open("https://chat.openai.com/", "_blank"); alert("Prompt đã được copy vào clipboard. Hãy dán (Ctrl+V) vào ô chat ChatGPT!");
+        }, function() {
+          alert("Không copy được prompt, hãy tự copy:\n\n" + prompt); window.open("https://chat.openai.com/", "_blank");
         });
       } else {
-        mentorFilterTime = null;
-        chatPrivMsgBtn.classList.remove('active');
-        db.ref('pmpchat/msgs').push({
-          from: myUsername,
-          to: "__all__",
-          content: "[Mentor đã TẮT chế độ PrivateMsgMentor. Tất cả user sẽ thấy lại mọi tin nhắn.]",
-          t: Date.now()
-        });
+        alert("Hãy tự copy prompt sau và dán vào ChatGPT:\n\n" + prompt); window.open("https://chat.openai.com/", "_blank");
       }
     };
-
-    function renderChatMsgs() {
-      let sel = chatToSelect.value;
-      let arr;
-      // Find the latest mentorFilterTime if any
-      let latestMentorFilterTime = null;
-      let latestMentor = null;
-      for (let i=allMsgs.length-1; i>=0; --i) {
-        let m = allMsgs[i];
-        if (m.mentorFilterActive && m.mentorFilterTime && m.from && /^Mentor_/.test(m.from)) {
-          latestMentorFilterTime = m.mentorFilterTime;
-          latestMentor = m.from;
-          break;
-        }
-      }
-      if (sel==="__all__") {
-        if (myUsername && !/^Mentor_/.test(myUsername) && latestMentorFilterTime) {
-          // User thường: chỉ thấy message từ Mentor_ hoặc thông báo hệ thống kể từ thời điểm bật filter
-          arr = allMsgs.filter(m=>
-            (m.t >= latestMentorFilterTime &&
-              (m.from && /^Mentor_/.test(m.from) || m.content?.startsWith('['))
-            )
-          );
-        } else {
-          arr = allMsgs.filter(m=>m.to==="__all__");
-        }
-      } else if (sel==="__group__") {
-        arr = [];
-      } else {
-        arr = allMsgs.filter(m=>
-          (m.from===myUsername && m.to===sel) || (m.from===sel && m.to===myUsername)
-        );
-      }
-      arr = arr.slice(-100);
-      chatMsgs.innerHTML = '';
-      arr.forEach(m=>{
-        let isMe = m.from===myUsername;
-        let div = document.createElement('div');
-        div.className = isMe ? 'chat-msg-you' : 'chat-msg-other';
-        div.innerHTML =
-          (!isMe && m.from ? `<div class="chat-msg-username">${m.from}</div>`:'') +
-          `<span class="chat-msg-bubble">${m.content}</span>`;
-        chatMsgs.appendChild(div);
-      });
-      chatMsgs.scrollTop = chatMsgs.scrollHeight;
-    }
-    chatToSelect.onchange = renderChatMsgs;
-    window.addEventListener('beforeunload', function() {
-      if (myUsername && userRef) userRef.remove();
-    });
+    document.getElementById("btn-first").onclick = function() { if(current>0){current=0;renderQuestion();} };
+    document.getElementById("btn-prev").onclick = function() { if(current>0){current--;renderQuestion();} };
+    document.getElementById("btn-next").onclick = function() { if(current<questions.length-1){current++;renderQuestion();} };
+    document.getElementById("btn-last").onclick = function() { if(current<questions.length-1){current=questions.length-1;renderQuestion();} };
+    document.getElementById("btn-list").onclick = function() { window.location.href = "questionsList.html"; };
+    document.getElementById("btn-end").onclick = function() {
+      localStorage.setItem('pmp_userAnswers', JSON.stringify(userAnswers));
+      localStorage.setItem('pmp_checked', JSON.stringify(checked));
+      window.location.href = "result.html";
+    };
+    window.onload = function() {
+      let raw = localStorage.getItem('pmp_questions');
+      if (!raw) { window.location.href = "index.html"; return; }
+      questions = JSON.parse(raw);
+      userAnswers = JSON.parse(localStorage.getItem('pmp_userAnswers')||"null") || Array(questions.length).fill(null);
+      checked = JSON.parse(localStorage.getItem('pmp_checked')||"null") || Array(questions.length).fill(false);
+      showExplanation = Array(questions.length).fill(false);
+      current = parseInt(localStorage.getItem('pmp_current_idx') || "0", 10);
+      renderQuestion();
+    };
   </script>
+  
+  <!-- ... Toàn bộ code quiz gốc của bạn ở đây, không thay đổi gì ... -->
+
+<!-- Thêm ngay trước </body> -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700"/>
+
+<!-- BUTTON CHAT FLOATING -->
+<button id="chat-btn-open" title="Tương tác online" style="position:fixed;bottom:36px;right:38px;z-index:1011;width:52px;height:52px;border-radius:50%;background:#1976d2;color:#fff;font-size:2.2em;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 14px rgba(33,150,243,0.15);border:none;cursor:pointer;">💬</button>
+<!-- POPUP CHAT -->
+<div id="chat-box" style="display:none;flex-direction:column;position:fixed;bottom:100px;right:38px;z-index:1012;width:355px;max-width:96vw;height:430px;background:#fff;border-radius:17px;box-shadow:0 8px 44px rgba(25,118,210,0.16);border:1.5px solid #1976d2;">
+  <div style="background:#1976d2;color:#fff;border-radius:17px 17px 0 0;padding:13px 16px 9px 16px;font-weight:bold;display:flex;align-items:center;justify-content:space-between;">
+    <span>💬 Online Chat</span>
+    <button id="chat-box-close" title="Đóng" style="background:#fff;border:none;color:#d32f2f;font-size:1.25em;cursor:pointer;border-radius:50%;width:31px;height:31px;box-shadow:0 0 2px #bbb;">&#10006;</button>
+  </div>
+  <div id="chat-login-area" style="padding:13px 14px 10px 14px;">
+    <label>Nhập tên của bạn:</label>
+    <input type="text" id="chat-username" maxlength="20" placeholder="Tên (không trùng)" style="width:85%;padding:7px;border-radius:7px;border:1px solid #bbb;margin-bottom:8px;">
+    <div id="chat-password-row" style="display:none;margin-top:8px;">
+      <input type="password" id="chat-password" maxlength="30" placeholder="Password cho Mentor_" style="width:85%;padding:7px;border-radius:7px;border:1px solid #bbb;">
+    </div>
+    <button id="chat-login-btn" style="margin-top:9px;background:#43a047;color:#fff;border:none;border-radius:6px;font-size:1em;font-weight:600;padding:7px 18px;cursor:pointer;">Vào phòng chat</button>
+    <div id="chat-info" style="color:#d32f2f;font-size:0.97em;margin:7px 0 0 0;"></div>
+  </div>
+  <div id="chat-main-area" style="display:none;padding:13px 14px 10px 14px;">
+    <div id="chat-user-list" style="font-size:0.98em;margin-bottom:7px;"></div>
+    <select id="chat-to-select" style="width:98%;padding:6px 6px 6px 10px;border-radius:5px;border:1px solid #ccc;margin-bottom:9px;">
+      <option value="__all__">💡 Nhóm chung (tất cả)</option>
+    </select>
+    <div id="chat-msgs" style="background:#f8fafb;border-radius:7px;height:197px;overflow-y:auto;padding:8px 7px 8px 7px;margin-bottom:7px;font-size:1.04em;"></div>
+    <form id="chat-msg-form" autocomplete="off" style="display:flex;align-items:center;margin-top:7px;position:relative;">
+      <input id="chat-msg-input" type="text" maxlength="250" placeholder="Nhập tin nhắn..." style="flex:1;padding:7px;border-radius:7px;border:1px solid #bbb;font-size:1em;">
+      <button id="chat-emoji-toggle" type="button" tabindex="-1" style="background:none;border:none;font-size:1.3em;cursor:pointer;margin-left:6px;">😊</button>
+      <div id="chat-emoji-list" style="display:none;position:absolute;bottom:45px;right:65px;background:#fff;border:1px solid #ccc;border-radius:10px;box-shadow:0 2px 16px #ccc;z-index:2000;padding:7px 9px;min-width:160px;text-align:center;">
+        <button type="button">😀</button><button type="button">😁</button><button type="button">😂</button><button type="button">🤣</button>
+        <button type="button">😊</button><button type="button">😍</button><button type="button">😎</button><button type="button">😢</button>
+        <button type="button">😭</button><button type="button">👍</button><button type="button">🙏</button><button type="button">👏</button>
+        <button type="button">💪</button><button type="button">❤️</button>
+      </div>
+      <button id="chat-msg-send" type="submit" style="background:#1976d2;color:#fff;border:none;border-radius:6px;padding:7px 15px;font-weight:600;margin-left:7px;font-size:1em;cursor:pointer;">Gửi</button>
+    </form>
+  </div>
+</div>
+<script>
+  // CHAT FUNCTIONALITY ONLY - KHÔNG ĐỤNG ĐẾN CODE QUIZ GỐC
+  const firebaseConfig = {
+    apiKey: "AIzaSyBQ2HWP1l7SIz3FyQaNz37xEgXiDAStnCs",
+    authDomain: "pmptraining-ad18c.firebaseapp.com",
+    databaseURL: "https://pmptraining-ad18c-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "pmptraining-ad18c",
+    storageBucket: "pmptraining-ad18c.appspot.com",
+    messagingSenderId: "595622352594",
+    appId: "1:595622352594:web:1e835cc6fadf45ceedff0b",
+    measurementId: "G-9FXNTLV9VV"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const chatBox = document.getElementById('chat-box');
+  const chatBtnOpen = document.getElementById('chat-btn-open');
+  const chatBoxClose = document.getElementById('chat-box-close');
+  const chatLoginArea = document.getElementById('chat-login-area');
+  const chatMainArea = document.getElementById('chat-main-area');
+  const chatUsernameInput = document.getElementById('chat-username');
+  const chatLoginBtn = document.getElementById('chat-login-btn');
+  const chatLogoutBtn = document.getElementById('chat-logout-btn');
+  const chatToSelect = document.getElementById('chat-to-select');
+  const chatMsgs = document.getElementById('chat-msgs');
+  const chatMsgForm = document.getElementById('chat-msg-form');
+  const chatMsgInput = document.getElementById('chat-msg-input');
+  const chatUserList = document.getElementById('chat-user-list');
+  const chatInfo = document.getElementById('chat-info');
+  const chatEmojiToggle = document.getElementById('chat-emoji-toggle');
+  const chatEmojiList = document.getElementById('chat-emoji-list');
+  const chatPasswordRow = document.getElementById('chat-password-row');
+  const chatPasswordInput = document.getElementById('chat-password');
+  let myUsername = null, userRef = null;
+  let allUsers = {};
+  let allMsgs = [];
+  let chatListener = null, userListener = null;
+
+  chatBtnOpen.onclick = function(){ chatBox.style.display = (chatBox.style.display==='flex'?'none':'flex'); }
+  chatBoxClose.onclick = function(){ chatBox.style.display="none"; }
+  chatLogoutBtn.onclick = function() {
+    if (myUsername && userRef) {
+      userRef.remove();
+      myUsername = null;
+      chatLoginArea.style.display="";
+      chatMainArea.style.display="none";
+      chatInfo.textContent='';
+      chatUsernameInput.value='';
+      chatMsgs.innerHTML = '';
+      chatToSelect.value="__all__";
+    }
+  };
+  chatUsernameInput.oninput = function() {
+    if(/^Mentor_/.test(chatUsernameInput.value.trim())) {
+      chatPasswordRow.style.display = "";
+    } else {
+      chatPasswordRow.style.display = "none";
+    }
+  };
+  chatEmojiToggle.onclick = function(e){
+    e.preventDefault();
+    chatEmojiList.style.display = (chatEmojiList.style.display==="block") ? "none" : "block";
+  };
+  document.addEventListener('click', function(e){
+    if (!chatEmojiList.contains(e.target) && e.target!==chatEmojiToggle) {
+      chatEmojiList.style.display = "none";
+    }
+  });
+  chatEmojiList.querySelectorAll('button').forEach(btn=>{
+    btn.onclick = function(e){
+      e.preventDefault();
+      chatMsgInput.value += this.textContent;
+      chatMsgInput.focus();
+      chatEmojiList.style.display = "none";
+    }
+  });
+  chatLoginBtn.onclick = function() {
+    let name = chatUsernameInput.value.trim();
+    if (!name) { chatInfo.textContent="Nhập tên!"; return; }
+    if (/[^a-zA-Z0-9_.-]/.test(name)) { chatInfo.textContent="Chỉ dùng chữ, số, gạch dưới, dấu chấm, gạch ngang!"; return; }
+    if (/^Mentor_/.test(name)) {
+      let pwd = chatPasswordInput.value;
+      if (pwd !== "MentorPMP2025@") {
+        chatInfo.textContent="Sai password Mentor!";
+        return;
+      }
+    }
+    chatLoginBtn.disabled = true;
+    db.ref('pmpchat/users/'+name).once('value', snap=>{
+      if (snap.val()) {
+        chatInfo.textContent="Tên này đã có người dùng!"; chatLoginBtn.disabled=false;
+      } else {
+        myUsername = name;
+        userRef = db.ref('pmpchat/users/'+myUsername);
+        userRef.set({online:true, t:Date.now()});
+        userRef.onDisconnect().remove();
+        chatLoginArea.style.display="none";
+        chatMainArea.style.display="";
+        chatInfo.textContent="";
+        listenUsers();
+        listenMsgs();
+        updateUserListUI();
+      }
+    });
+  };
+  function listenUsers() {
+    if (userListener) db.ref('pmpchat/users').off('value', userListener);
+    userListener = db.ref('pmpchat/users').on('value', snap=>{
+      allUsers = snap.val()||{};
+      updateUserListUI();
+      updateCombo();
+    });
+  }
+  function updateUserListUI() {
+    let arr = Object.keys(allUsers||{}).sort();
+    chatUserList.innerHTML = arr.length
+      ? '<b>Online:</b> ' + arr.map(n=>n===myUsername?`<span style="color:#1976d2">${n}</span>`:n).join(', ')
+      : '<span style="color:#d32f2f">Không có ai online</span>';
+  }
+  function updateCombo() {
+    let val = chatToSelect.value;
+    chatToSelect.innerHTML = '<option value="__all__">💡 Nhóm chung (tất cả)</option>';
+    let arr = Object.keys(allUsers||{}).sort().filter(n=>n!==myUsername);
+    arr.forEach(n=>{
+      chatToSelect.innerHTML += `<option value="${n}">👤 ${n}</option>`;
+    });
+    if (arr.length>=2) {
+      chatToSelect.innerHTML += `<option value="__group__">👥 Nhóm nhỏ tuỳ chọn</option>`;
+    }
+    chatToSelect.value = val;
+  }
+  function listenMsgs() {
+    if (chatListener) db.ref('pmpchat/msgs').off('value', chatListener);
+    chatListener = db.ref('pmpchat/msgs').on('value', snap=>{
+      allMsgs = [];
+      snap.forEach(child=>{ allMsgs.push(child.val()); });
+      renderChatMsgs();
+    });
+  }
+  chatMsgForm.onsubmit = function(e){
+    e.preventDefault();
+    let to = chatToSelect.value;
+    let content = chatMsgInput.value.trim();
+    if (!content) return;
+    let msg = {
+      from: myUsername,
+      to: to,
+      content: content,
+      t: Date.now()
+    };
+    if (to==="__group__") {
+      let group = prompt("Nhập tên các thành viên nhóm, phân cách bởi dấu phẩy (,), VD: user1,user2,user3 (bao gồm cả bạn nếu muốn)");
+      if (!group) return;
+      let names = group.split(',').map(s=>s.trim()).filter(Boolean);
+      names.forEach(u=>{
+        let m2 = {...msg, to:u};
+        db.ref('pmpchat/msgs').push(m2);
+      });
+    } else if (to==="__all__") {
+      db.ref('pmpchat/msgs').push(msg);
+    } else {
+      db.ref('pmpchat/msgs').push(msg);
+    }
+    chatMsgInput.value="";
+  };
+  function renderChatMsgs() {
+    let sel = chatToSelect.value;
+    let arr;
+    if (sel==="__all__") arr = allMsgs.filter(m=>m.to==="__all__");
+    else if (sel==="__group__") arr = [];
+    else arr = allMsgs.filter(m=>(m.from===myUsername && m.to===sel) || (m.from===sel && m.to===myUsername));
+    arr = arr.slice(-100);
+    chatMsgs.innerHTML = '';
+    arr.forEach(m=>{
+      let isMe = m.from===myUsername;
+      let div = document.createElement('div');
+      div.className = isMe ? 'chat-msg-you' : 'chat-msg-other';
+      div.innerHTML =
+        (!isMe&&m.from?`<div class="chat-msg-username">${m.from}</div>`:'') +
+        `<span class="chat-msg-bubble">${m.content}</span>`;
+      chatMsgs.appendChild(div);
+    });
+    chatMsgs.scrollTop = chatMsgs.scrollHeight;
+  }
+  chatToSelect.onchange = renderChatMsgs;
+  window.addEventListener('beforeunload', function() {
+    if (myUsername && userRef) userRef.remove();
+  });
+</script>
+  
 </body>
 </html>
