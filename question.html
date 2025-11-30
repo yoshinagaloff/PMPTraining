@@ -2,12 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>PMP MOCK TEST - Question (with Realtime Chat)</title>
-  <!-- Firebase -->
+  <title>PMP MOCK TEST - Question (with Chat)</title>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
-    /* ---------- QUIZ GIAO DIỆN ---------- */
     body { background:#f4f4f4; font-size:15px;}
     .container {
       max-width:820px; margin:36px auto; background:#fff; border-radius:18px; box-shadow:0 6px 32px rgba(0,0,0,0.08);
@@ -24,23 +22,15 @@
     .level-Moderate { background:#fbc02d; color:#fff;}
     .level-Difficult { background:#d32f2f; color:#fff;}
     .level-Expert { background:#8e24aa; color:#fff;}
-    .summary-row { color:#666; font-size:1em; margin-bottom:11px; font-weight:bold;}
+    .summary-row { color:#666; font-size:1.06em; margin-bottom:11px; font-weight:bold;}
     .question-main { font-size:1em; margin-bottom:18px; font-weight:400;}
     .answers { margin-bottom:20px;}
     .answer-label { display:block; margin-bottom:13px; font-size:1em; font-weight:400;}
     .answer-label input[type="radio"], .answer-label input[type="checkbox"] { margin-right:10px; }
-    .hint-row { margin-bottom:13px;}
-    .hint-btn {
-      font-size:0.95em; color:#1976d2; background:#e3f2fd; border:none; border-radius:7px; padding:6px 14px; margin-right:0; cursor:pointer;
-      font-weight:500; box-shadow:0 1px 1.5px rgba(33,150,243,0.08);
-      transition: background 0.2s;
-      display:inline-block;
-    }
-    .hint-btn:hover { background:#bbdefb; }
     .answer-row { display:flex; align-items:center; margin-top:14px; margin-bottom:15px; gap:30px;}
     .answer-btn {
       background:#1976d2; color:#fff; border:none; border-radius:7px; font-size:1em; font-weight:600;
-      padding:8px 26px; cursor:pointer; transition:background 0.2s; display:inline-block;
+      padding:8px 26px; cursor:pointer;
     }
     .answer-btn:hover { background:#0d47a1;}
     .toggle-explanation-link {
@@ -150,69 +140,74 @@
     #clear-icon {
       font-size: 1.2em;
     }
-    @media (max-width: 950px) {
-      .container {max-width:99vw; padding:2vw;}
-      #timer-controls {max-width:95vw;}
-    }
-    /* ---------- CHAT ONLINE ---------- */
+
+    /* CHAT */
     #chat-btn-open {
       position:fixed; bottom:30px; right:35px;
       background: #1976d2; color:#fff; border:none; border-radius:50%; width:46px; height:46px;
       font-size:2em; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 14px rgba(33,150,243,0.13);
-      z-index:1011;
-      transition: background 0.18s;
+      z-index:1011; transition: background 0.18s;
     }
     #chat-btn-open:hover { background: #388e3c;}
     #chat-box {
       display:none; flex-direction:column;
       position:fixed; bottom:90px; right:40px; z-index:1001;
-      width:350px; max-width:95vw; height:520px; background:#fff;
+      width:350px; max-width:95vw; height:560px; background:#fff;
       border-radius:14px; box-shadow:0 8px 44px rgba(25,118,210,0.16);
-      border:1.5px solid #1976d2;
-      animation:openchat 0.18s;
+      border:1.5px solid #1976d2; animation:openchat 0.18s;
     }
     @keyframes openchat { 0%{transform:scale(0.6); opacity:0;} 100%{transform:scale(1); opacity:1;}}
-    #chat-header {
-      background:#1976d2; color:#fff; border-radius:14px 14px 0 0; padding:11px 18px 8px 18px; font-weight:bold;
-      display:flex; align-items:center; justify-content:space-between;
-    }
-    #chat-header-title { font-size:1.08em; }
+    #chat-header {background:#1976d2; color:#fff; border-radius:14px 14px 0 0; padding:11px 18px 8px 18px; font-weight:bold; display:flex; align-items:center; justify-content:space-between;}
+    #chat-header-title { font-size:1.08em;}
     #chat-box-close {
-      background:none; border:none; color:#fff; font-size:1.4em; cursor:pointer; margin-left:10px;
+      background:#fff; border:none; color:#d32f2f; font-size:1.15em; cursor:pointer; margin-left:10px; border-radius:50%; width:28px; height:28px; line-height:1; text-align:center; box-shadow:0 0 2px #bbb;
+      position: absolute; right:10px; top:10px; z-index:10; padding:0;
     }
+    #chat-box-close:hover { background:#ffd5d5; color:#b71c1c;}
     #chat-login-area, #chat-main-area { padding:14px 18px 10px 18px;}
     #chat-login-area label { display:block; margin:7px 0 3px 0;}
     #chat-username { width:85%; padding:7px; border-radius:7px; border:1px solid #bbb; margin-bottom:8px;}
     #chat-login-btn { margin-top:9px; background:#43a047; color:#fff; border:none; border-radius:6px; font-size:1em; font-weight:600; padding:7px 18px; cursor:pointer;}
-    #chat-logout-btn { background:#d32f2f; color:#fff; border:none; border-radius:6px; font-size:0.98em; padding:5px 13px; font-weight:bold; margin-left:10px;}
+    #chat-logout-btn {
+      background:#d32f2f; color:#fff; border:none; border-radius:50%; width:24px; height:24px; font-size:0.98em; font-weight:bold; margin-left:10px; margin-bottom:0;
+      position:absolute; top:16px; right:48px; z-index:10; padding:0;
+      display:flex;align-items:center;justify-content:center;
+      min-width:0; min-height:0;
+    }
+    #chat-logout-btn:hover { background:#b71c1c;}
     #chat-to-select { width:98%; padding:6px 6px 6px 10px; border-radius:5px; border:1px solid #ccc; margin-bottom:9px;}
-    #chat-msgs { background:#f8fafb; border-radius:7px; height:205px; overflow-y:auto; padding:10px 8px 10px 8px; margin-bottom:7px; font-size:0.99em;}
+    #chat-msgs { background:#f8fafb; border-radius:7px; height:325px; overflow-y:auto; padding:10px 8px 10px 8px; margin-bottom:7px; font-size:0.99em;}
     .chat-msg-you { text-align:right; margin:7px 0;}
     .chat-msg-you .chat-msg-bubble {background:#bbdefb; color:#1976d2;}
     .chat-msg-other { text-align:left; margin:7px 0;}
     .chat-msg-other .chat-msg-bubble {background:#f1f8e9; color:#222;}
-    .chat-msg-bubble {
-      display:inline-block; padding:6px 13px; border-radius:14px; max-width:81%; word-break:break-word;
-      margin-bottom:2px; font-size:1em;
-    }
+    .chat-msg-bubble { display:inline-block; padding:6px 13px; border-radius:14px; max-width:81%; word-break:break-word; margin-bottom:2px; font-size:1em;}
     .chat-msg-username { font-size:0.93em; color:#888; margin-bottom:2px; }
-    #chat-msg-form { display:flex; align-items:center; margin-top:7px;}
+    #chat-msg-form { display:flex; align-items:center; margin-top:7px; position:relative;}
     #chat-msg-input { flex:1; padding:7px; border-radius:7px; border:1px solid #bbb; font-size:1em;}
     #chat-msg-send { background:#1976d2; color:#fff; border:none; border-radius:6px; padding:7px 15px; font-weight:600; margin-left:7px; font-size:1em; cursor:pointer;}
-    #chat-emojis { margin-left:5px;}
-    .chat-emoji-btn { background:none; border:none; font-size:1.3em; margin-right:1px; cursor:pointer;}
+    #chat-emoji-toggle { background:none; border:none; font-size:1.3em; cursor:pointer; margin-left:6px;}
+    #chat-emoji-list {
+      display:none; position:absolute; bottom:45px; right:65px; background:#fff; border:1px solid #ccc; border-radius:10px; box-shadow:0 2px 16px #ccc;
+      z-index:2000; padding:7px 9px; min-width:160px; text-align:center;
+    }
+    #chat-emoji-list button {
+      border:none; background:none; font-size:1.45em; margin:2px 4px; cursor:pointer; border-radius:7px; padding:2px 2px;
+      transition:background .14s;
+    }
+    #chat-emoji-list button:hover { background:#eeeeee;}
     #chat-user-list { font-size:0.98em; margin-bottom:7px;}
     #chat-user-list b { color:#43a047;}
     #chat-info {color:#d32f2f; font-size:0.97em; margin:7px 0 0 0;}
     @media (max-width: 500px) {
-      #chat-box {width:99vw; right:1vw; bottom:0; max-height:85vh;}
+      #chat-box {width:99vw; right:1vw; bottom:0; max-height:90vh;}
       #chat-main-area, #chat-login-area {padding:10px 4vw;}
+      #chat-emoji-list {right:8vw;}
     }
   </style>
 </head>
 <body>
   <div class="container" id="main-container">
-    <!-- Giao diện quiz (như bạn yêu cầu) -->
     <div class="icon-main">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" stroke="#1976d2" stroke-width="4" fill="#e3f2fd"/><text x="32" y="41" text-anchor="middle" font-size="32" fill="#1976d2" font-family="Arial" font-weight="bold">?</text></svg>
       <span>📚</span>
@@ -235,9 +230,6 @@
     <div class="summary-row" id="question-summary"></div>
     <div class="question-main" id="question-main"></div>
     <form id="answers" class="answers"></form>
-    <div class="hint-row">
-      <button class="hint-btn" id="hint-btn">HINT: Ask ChatGPT</button>
-    </div>
     <div class="answer-row">
       <button class="answer-btn" id="answer-btn">ANSWER</button>
       <button class="toggle-explanation-link" id="toggle-explanation" type="button">+ Show answer & explanation</button>
@@ -264,11 +256,13 @@
       </div>
     </div>
   </div>
-  <!-- KHUNG CHAT ONLINE -->
+
+  <!-- CHAT -->
   <button id="chat-btn-open" title="Tương tác online">&#128172;</button>
   <div id="chat-box">
     <div id="chat-header">
       <span id="chat-header-title">💬 Online Chat</span>
+      <button id="chat-logout-btn" title="Thoát">&#10060;</button>
       <button id="chat-box-close" title="Đóng">&#10006;</button>
     </div>
     <div id="chat-login-area">
@@ -280,7 +274,6 @@
     <div id="chat-main-area" style="display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div id="chat-user-list"></div>
-        <button id="chat-logout-btn">Thoát</button>
       </div>
       <select id="chat-to-select">
         <option value="__all__">💡 Nhóm chung (tất cả)</option>
@@ -288,27 +281,73 @@
       <div id="chat-msgs"></div>
       <form id="chat-msg-form" autocomplete="off">
         <input id="chat-msg-input" type="text" maxlength="250" placeholder="Nhập tin nhắn...">
-        <span id="chat-emojis">
-          <button type="button" class="chat-emoji-btn">&#128512;</button>
-          <button type="button" class="chat-emoji-btn">&#128513;</button>
-          <button type="button" class="chat-emoji-btn">&#128525;</button>
-          <button type="button" class="chat-emoji-btn">&#128514;</button>
-          <button type="button" class="chat-emoji-btn">&#128518;</button>
-          <button type="button" class="chat-emoji-btn">&#128151;</button>
-          <button type="button" class="chat-emoji-btn">&#128079;</button>
-        </span>
+        <button id="chat-emoji-toggle" type="button" tabindex="-1">😊</button>
+        <div id="chat-emoji-list">
+          <button type="button">😀</button>
+          <button type="button">😁</button>
+          <button type="button">😂</button>
+          <button type="button">🤣</button>
+          <button type="button">😊</button>
+          <button type="button">😍</button>
+          <button type="button">😎</button>
+          <button type="button">😢</button>
+          <button type="button">😭</button>
+          <button type="button">👍</button>
+          <button type="button">🙏</button>
+          <button type="button">👏</button>
+          <button type="button">💪</button>
+          <button type="button">❤️</button>
+        </div>
         <button id="chat-msg-send" type="submit">Gửi</button>
       </form>
     </div>
   </div>
-  <!-- END KHUNG CHAT -->
+  <!-- END CHAT -->
 
   <script>
-    // ========== TIMER ==========
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBQ2HWP1l7SIz3FyQaNz37xEgXiDAStnCs",
+      authDomain: "pmptraining-ad18c.firebaseapp.com",
+      databaseURL: "https://pmptraining-ad18c-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "pmptraining-ad18c",
+      storageBucket: "pmptraining-ad18c.appspot.com",
+      messagingSenderId: "595622352594",
+      appId: "1:595622352594:web:1e835cc6fadf45ceedff0b",
+      measurementId: "G-9FXNTLV9VV"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // === QUIZ DỮ LIỆU DEMO (nếu chưa có local) ===
+    if (!localStorage.getItem('pmp_questions')) {
+      let questions = [
+        {
+          question: "A company is implementing a new computerized system. During project execution, the leader of a department that is critical to project completion raises a concern that the department's requirements are completely missing from the approved project management plan.\n\nWhat should the project manager have done to avoid this issue?",
+          short: "Câu hỏi kiểm tra kỹ năng lập kế hoạch dự án, đảm bảo tất cả các bên liên quan quan trọng đều được tham gia để không bỏ sót yêu cầu.",
+          options: [
+            "Managed the expectations of all relevant stakeholders.",
+            "Sought expert judgment in the project scope design.",
+            "Involved all relevant stakeholders in the project planning.",
+            "Developed a change management plan to approve changes."
+          ],
+          correct: 2,
+          reference: "PMBOK Guide Seventh Edition, Stakeholder Planning",
+          explanation_en: "If the department leader was not included in project planning activities, seeking expert judgment in the project scope design would not resolve the issue of missing requirements.",
+          explanation_vi: "Quản lý dự án cần đảm bảo tất cả các bên liên quan quan trọng đều được tham gia vào quá trình lập kế hoạch dự án.",
+          difficulty: "Moderate"
+        }
+      ];
+      localStorage.setItem('pmp_questions', JSON.stringify(questions));
+      localStorage.setItem('pmp_checked', JSON.stringify([false]));
+      localStorage.setItem('pmp_userAnswers', JSON.stringify([null]));
+      localStorage.setItem('pmp_current_idx', "0");
+    }
+
+    // === TIMER ===
     let timerInterval = null;
     let remainingTime = 60;
     let timerIsActive = false;
-
     function displayTimer(sec) {
       let m = Math.floor(sec/60).toString().padStart(2,'0');
       let s = (sec%60).toString().padStart(2,'0');
@@ -344,36 +383,7 @@
     document.getElementById('reset-timer').onclick = resetTimer;
     window.addEventListener('DOMContentLoaded', ()=>{ resetTimer(); });
 
-    // ========== CLEAR/RESET ANSWER ==========
-    document.getElementById('clear-answer').onclick = function() {
-      document.querySelectorAll('input[type=radio][name="q'+current+'"],input[type=checkbox][name="q'+current+'"]').forEach(el=>{
-        el.checked = false;
-        el.disabled = false;
-      });
-      userAnswers[current] = (getMultiCount(questions[current].question, questions[current].options) > 1) ? [] : null;
-      checked[current] = false;
-      localStorage.setItem('pmp_userAnswers', JSON.stringify(userAnswers));
-      localStorage.setItem('pmp_checked', JSON.stringify(checked));
-      document.getElementById('status').textContent = "";
-      document.getElementById('status').className = "status";
-      document.getElementById("toggle-explanation").innerHTML = "+ Show answer & explanation";
-      document.getElementById("explanation").style.display = "none";
-      showExplanation[current] = false;
-      let q = questions[current];
-      if(q && q.options) {
-        for (let i = 0; i < q.options.length; i++) {
-          let lbl = document.getElementById('label'+i);
-          if(lbl) lbl.classList.remove("highlight-correct","highlight-incorrect");
-        }
-      }
-      let multiCount = getMultiCount(questions[current].question, questions[current].options);
-      if(multiCount > 1){
-        let boxes = document.querySelectorAll('input[type=checkbox][name="q'+current+'"]');
-        boxes.forEach(box=>{ box.disabled = false; });
-      }
-    };
-
-    // ========== QUIZ LOGIC ==========
+    // === QUIZ LOGIC ===
     let questions = [];
     let current = 0;
     let userAnswers = [];
@@ -543,19 +553,6 @@
       document.getElementById("explanation").style.display = showExplanation[current] ? "block" : "none";
       this.innerHTML = showExplanation[current] ? "- Hide answer & explanation" : "+ Show answer & explanation";
     };
-    document.getElementById("hint-btn").onclick = function() {
-      const q = questions[current];
-      let prompt = `Phân tích câu hỏi PMP sau, giải thích chi tiết bằng tiếng Việt và lý do chọn, không chọn từng đáp án.\n\nCâu hỏi:\n${q.question}\n\nCác đáp án:\n${q.options.map((opt, i)=>String.fromCharCode(65+i)+'. '+opt).join('\n')}`;
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(prompt).then(function() {
-          window.open("https://chat.openai.com/", "_blank"); alert("Prompt đã được copy vào clipboard. Hãy dán (Ctrl+V) vào ô chat ChatGPT!");
-        }, function() {
-          alert("Không copy được prompt, hãy tự copy:\n\n" + prompt); window.open("https://chat.openai.com/", "_blank");
-        });
-      } else {
-        alert("Hãy tự copy prompt sau và dán vào ChatGPT:\n\n" + prompt); window.open("https://chat.openai.com/", "_blank");
-      }
-    };
     document.getElementById("btn-first").onclick = function() { if(current>0){current=0;renderQuestion();} };
     document.getElementById("btn-prev").onclick = function() { if(current>0){current--;renderQuestion();} };
     document.getElementById("btn-next").onclick = function() { if(current<questions.length-1){current++;renderQuestion();} };
@@ -566,10 +563,38 @@
       localStorage.setItem('pmp_checked', JSON.stringify(checked));
       window.location.href = "result.html";
     };
+    document.getElementById('clear-answer').onclick = function() {
+      document.querySelectorAll('input[type=radio][name="q'+current+'"],input[type=checkbox][name="q'+current+'"]').forEach(el=>{
+        el.checked = false;
+        el.disabled = false;
+      });
+      userAnswers[current] = (getMultiCount(questions[current].question, questions[current].options) > 1) ? [] : null;
+      checked[current] = false;
+      localStorage.setItem('pmp_userAnswers', JSON.stringify(userAnswers));
+      localStorage.setItem('pmp_checked', JSON.stringify(checked));
+      document.getElementById('status').textContent = "";
+      document.getElementById('status').className = "status";
+      document.getElementById("toggle-explanation").innerHTML = "+ Show answer & explanation";
+      document.getElementById("explanation").style.display = "none";
+      showExplanation[current] = false;
+      let q = questions[current];
+      if(q && q.options) {
+        for (let i = 0; i < q.options.length; i++) {
+          let lbl = document.getElementById('label'+i);
+          if(lbl) lbl.classList.remove("highlight-correct","highlight-incorrect");
+        }
+      }
+      let multiCount = getMultiCount(questions[current].question, questions[current].options);
+      if(multiCount > 1){
+        let boxes = document.querySelectorAll('input[type=checkbox][name="q'+current+'"]');
+        boxes.forEach(box=>{ box.disabled = false; });
+      }
+    };
+
     window.onload = function() {
       let raw = localStorage.getItem('pmp_questions');
       if (!raw) { window.location.href = "index.html"; return; }
-      questions = JSON.parse(raw);
+      questions = JSON.parse(localStorage.getItem('pmp_questions'));
       userAnswers = JSON.parse(localStorage.getItem('pmp_userAnswers')||"null") || Array(questions.length).fill(null);
       checked = JSON.parse(localStorage.getItem('pmp_checked')||"null") || Array(questions.length).fill(false);
       showExplanation = Array(questions.length).fill(false);
@@ -577,20 +602,7 @@
       renderQuestion();
     };
 
-    // ========== CHAT ONLINE ==========
-    // --- Firebase config: SỬA THÀNH CỦA BẠN ---
-    const firebaseConfig = {
-      apiKey: "AIzaSy...YOUR_KEY...",
-      authDomain: "your-project-id.firebaseapp.com",
-      databaseURL: "https://your-project-id-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "your-project-id",
-      storageBucket: "your-project-id.appspot.com",
-      messagingSenderId: "...",
-      appId: "...",
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
+    // === CHAT UI ===
     const chatBox = document.getElementById('chat-box');
     const chatBtnOpen = document.getElementById('chat-btn-open');
     const chatBoxClose = document.getElementById('chat-box-close');
@@ -605,6 +617,8 @@
     const chatMsgInput = document.getElementById('chat-msg-input');
     const chatUserList = document.getElementById('chat-user-list');
     const chatInfo = document.getElementById('chat-info');
+    const chatEmojiToggle = document.getElementById('chat-emoji-toggle');
+    const chatEmojiList = document.getElementById('chat-emoji-list');
     let myUsername = null, userRef = null;
     let allUsers = {};
     let allMsgs = [];
@@ -612,10 +626,21 @@
 
     chatBtnOpen.onclick = ()=>{ chatBox.style.display="flex"; }
     chatBoxClose.onclick = ()=>{ chatBox.style.display="none"; }
-    document.querySelectorAll(".chat-emoji-btn").forEach(btn=>{
-      btn.onclick = function(){
+    chatEmojiToggle.onclick = function(e){
+      e.preventDefault();
+      chatEmojiList.style.display = (chatEmojiList.style.display==="block") ? "none" : "block";
+    };
+    document.addEventListener('click', function(e){
+      if (!chatEmojiList.contains(e.target) && e.target!==chatEmojiToggle) {
+        chatEmojiList.style.display = "none";
+      }
+    });
+    chatEmojiList.querySelectorAll('button').forEach(btn=>{
+      btn.onclick = function(e){
+        e.preventDefault();
         chatMsgInput.value += this.textContent;
         chatMsgInput.focus();
+        chatEmojiList.style.display = "none";
       }
     });
     chatLoginBtn.onclick = function() {
@@ -703,12 +728,16 @@
     function renderChatMsgs() {
       let sel = chatToSelect.value;
       chatMsgs.innerHTML = '';
-      let arr = allMsgs.filter(m=>{
-        if(sel==="__all__") return m.to==="__all__";
-        if(sel==="__group__") return false;
-        return (m.from===myUsername && m.to===sel) || (m.from===sel && m.to===myUsername);
-      });
-      if (sel==="__all__") arr = allMsgs.filter(m=>m.to==="__all__");
+      let arr;
+      if (sel==="__all__") {
+        arr = allMsgs.filter(m=>m.to==="__all__");
+      } else if (sel==="__group__") {
+        arr = [];
+      } else {
+        arr = allMsgs.filter(m=>
+          (m.from===myUsername && m.to===sel) || (m.from===sel && m.to===myUsername)
+        );
+      }
       arr = arr.slice(-100);
       arr.forEach(m=>{
         let isMe = m.from===myUsername;
