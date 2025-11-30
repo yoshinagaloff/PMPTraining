@@ -18,6 +18,7 @@ if (!document.getElementById("chat-btn-open")) {
       <div id="chat-header">
         <span id="chat-header-title">💬 Online Chat</span>
         <span>
+          <button id="chat-expand-btn" title="Mở rộng chat" style="margin-right:9px;font-size:1.35em;vertical-align:middle;">🗖</button>
           <button id="chat-privatemsg" style="display:none;">PrivateMsgMentor</button>
           <button id="chat-popup-close" title="Đóng">&#10006;</button>
         </span>
@@ -58,6 +59,7 @@ if (!document.getElementById("chat-btn-open")) {
 const chatPopupBox = document.getElementById('chat-popup-box');
 const chatBtnOpen = document.getElementById('chat-btn-open');
 const chatPopupClose = document.getElementById('chat-popup-close');
+const chatExpandBtn = document.getElementById('chat-expand-btn');
 const chatLoginArea = document.getElementById('chat-login-area');
 const chatMainArea = document.getElementById('chat-main-area');
 const chatUsernameInput = document.getElementById('chat-username');
@@ -83,8 +85,41 @@ let mentorFilterTime = null;
 
 function normName(name) {return (name||"").toLowerCase();}
 
+// Popup toggle
 chatBtnOpen.onclick = function(){ chatPopupBox.style.display = (chatPopupBox.style.display==='flex'?'none':'flex'); }
+
+// Đóng popup
 chatPopupClose.onclick = function(){ chatPopupBox.style.display="none"; }
+
+chatExpandBtn.onclick = function() {
+  // Toggle full screen
+  if (chatPopupBox.classList.contains("chat-fullscreen")) {
+    chatPopupBox.classList.remove("chat-fullscreen");
+    chatExpandBtn.innerHTML = "🗖";
+  } else {
+    chatPopupBox.classList.add("chat-fullscreen");
+    chatExpandBtn.innerHTML = "🗗";
+  }
+  setTimeout(()=>resizeChatControls(), 200); // auto resize sau khi đổi trạng thái
+};
+window.addEventListener("resize", resizeChatControls);
+function resizeChatControls() {
+  if (chatPopupBox.classList.contains("chat-fullscreen")) {
+    chatMsgs.style.height = (window.innerHeight - 210) + "px";
+    chatPopupBox.style.height = window.innerHeight + "px";
+    chatPopupBox.style.width = window.innerWidth + "px";
+    chatPopupBox.style.maxWidth = "100vw";
+    chatPopupBox.style.maxHeight = "100vh";
+  } else {
+    chatMsgs.style.height = "";
+    chatPopupBox.style.height = "";
+    chatPopupBox.style.width = "";
+    chatPopupBox.style.maxWidth = "";
+    chatPopupBox.style.maxHeight = "";
+  }
+}
+
+// Đăng xuất
 chatLogoutBtn.onclick = function() {
   if (myUsername && userRef) { userRef.remove(); }
   myUsername = null;
@@ -97,6 +132,8 @@ chatLogoutBtn.onclick = function() {
   mentorFilterActive = false; mentorFilterTime = null;
   showMentorBtn();
 };
+
+// Kiểm tra Mentor nhập password
 chatUsernameInput.oninput = function() {
   if(/^mentor_/i.test(chatUsernameInput.value.trim())) {
     chatPasswordRow.style.display = "";
@@ -104,6 +141,8 @@ chatUsernameInput.oninput = function() {
     chatPasswordRow.style.display = "none";
   }
 };
+
+// Emoji toggle
 chatEmojiToggle.onclick = function(e){
   e.preventDefault();
   chatEmojiList.style.display = (chatEmojiList.style.display==="block") ? "none" : "block";
@@ -121,6 +160,8 @@ chatEmojiList.querySelectorAll('button').forEach(btn=>{
     chatEmojiList.style.display = "none";
   }
 });
+
+// Đăng nhập
 chatLoginBtn.onclick = function() {
   let name = chatUsernameInput.value.trim();
   if (!name) { chatInfo.textContent="Nhập tên!"; return; }
@@ -154,6 +195,7 @@ chatLoginBtn.onclick = function() {
     mentorFilterActive = false;
     mentorFilterTime = null;
     showMentorBtn();
+    resizeChatControls();
   });
 };
 
@@ -195,6 +237,7 @@ function updatePrivMsgBtnState() {
 chatToSelect.onchange = function() {
   showMentorBtn();
   renderChatMsgs();
+  resizeChatControls();
 };
 
 chatPrivMsgBtn.onclick = function() {
@@ -321,10 +364,12 @@ function renderChatMsgs() {
     chatMsgs.appendChild(div);
   });
   chatMsgs.scrollTop = chatMsgs.scrollHeight;
+  resizeChatControls();
 }
 chatToSelect.onchange = function() {
   showMentorBtn();
   renderChatMsgs();
+  resizeChatControls();
 };
 window.addEventListener('beforeunload', function() {
   if (myUsername && userRef) userRef.remove();
