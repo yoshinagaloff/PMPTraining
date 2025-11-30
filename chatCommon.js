@@ -154,11 +154,10 @@ chatLoginBtn.onclick = function() {
     mentorFilterActive = false;
     mentorFilterTime = null;
     showMentorBtn();
-    updatePrivMsgBtnState(); // Đảm bảo trạng thái khi login
   });
 };
 
-// Nút toggle chỉ hiện khi đã login Mentor_ VÀ đang chọn nhóm chung
+// Chỉ show button cho Mentor và khi chọn nhóm chung
 function showMentorBtn() {
   if(/^mentor_/i.test(myUsername) && chatToSelect.value==="__all__") {
     chatPrivMsgBtn.style.display = 'inline-block';
@@ -179,7 +178,6 @@ function showMentorBtn() {
     chatPrivMsgBtn.classList.add('disabled');
   }
 }
-
 function updatePrivMsgBtnState() {
   if (mentorFilterActive) {
     chatPrivMsgBtn.classList.add('active');
@@ -219,7 +217,8 @@ chatPrivMsgBtn.onclick = function() {
       from: myUsername,
       to: "__all__",
       content: "[Mentor đã TẮT chế độ PrivateMsgMentor. Tất cả user sẽ thấy lại mọi tin nhắn.]",
-      t: Date.now()
+      t: Date.now(),
+      mentorFilterActive: false
     });
   }
 };
@@ -238,6 +237,7 @@ function updateUserListUI() {
     ? '<b>Online:</b> ' + arr.map(n=> normName(n)===normName(myUsername)?`<span style="color:#1976d2">${n}</span>`:n).join(', ')
     : '<span style="color:#d32f2f">Không có ai online</span>';
 }
+// Chỉ hiển thị nhóm chung và từng user, KHÔNG có nhóm nhỏ tuỳ chọn
 function updateCombo() {
   let val = chatToSelect.value;
   chatToSelect.innerHTML = '<option value="__all__">💡 Nhóm chung (tất cả)</option>';
@@ -245,9 +245,6 @@ function updateCombo() {
   arr.forEach(n=>{
     chatToSelect.innerHTML += `<option value="${n}">👤 ${n}</option>`;
   });
-  if (arr.length>=2) {
-    chatToSelect.innerHTML += `<option value="__group__">👥 Nhóm nhỏ tuỳ chọn</option>`;
-  }
   chatToSelect.value = val;
 }
 function listenMsgs() {
@@ -273,42 +270,50 @@ chatMsgForm.onsubmit = function(e){
   chatMsgInput.value="";
 };
 
-function renderChatMsgs() {
-  let sel = chatToSelect.value;
-  let latestMentorFilterTime = null;
-  for (let i=allMsgs.length-1; i>=0; --i) {
-    let m = allMsgs[i];
+// Lọc PrivateMsgMentor dựa trên lịch sử bật/tắt trên server
+function getPrivateModeStateAndTime() {
+  let state = false, time = null;
+  for (let i = 0; i < allMsgs.length; ++i) {
+    const m = allMsgs[i];
     if (m.mentorFilterActive && m.mentorFilterTime && m.from && /^mentor_/i.test(m.from)) {
-      latestMentorFilterTime = m.mentorFilterTime;
-      break;
+      state = true;
+      time = m.mentorFilterTime;
+    }
+    if (!m.mentorFilterActive && m.from && /^mentor_/i.test(m.from) && m.content && m.content.includes('TẮT')) {
+      state = false;
+      time = null;
     }
   }
+  return {state, time};
+}
+function renderChatMsgs() {
+  let sel = chatToSelect.value;
+  let {state: privateOn, time: privateTime} = getPrivateModeStateAndTime();
   let arr;
-  if (sel==="__all__") {
-    if (myUsername && !/^mentor_/i.test(myUsername) && mentorFilterActive && latestMentorFilterTime) {
-      arr = allMsgs.filter(m=>
-        (m.t >= latestMentorFilterTime &&
-          (m.from && /^mentor_/i.test(m.from) || m.content?.startsWith('['))
+  if (sel === "__all__") {
+    if (myUsername && !/^mentor_/i.test(myUsername) && privateOn && privateTime) {
+      arr = allMsgs.filter(m =>
+        (m.t >= privateTime &&
+          ((m.from && /^mentor_/i.test(m.from)) || (m.content?.startsWith('[')))
         )
       );
     } else {
-      arr = allMsgs.filter(m=>m.to==="__all__");
+      arr = allMsgs.filter(m => m.to === "__all__");
     }
-  } else if (sel==="__group__") {
-    arr = [];
   } else {
-    arr = allMsgs.filter(m=>
-      (normName(m.from)===normName(myUsername) && m.to===sel) || (normName(m.from)===normName(sel) && m.to===myUsername)
+    arr = allMsgs.filter(m =>
+      (normName(m.from) === normName(myUsername) && m.to === sel) ||
+      (normName(m.from) === normName(sel) && m.to === myUsername)
     );
   }
   arr = arr.slice(-100);
   chatMsgs.innerHTML = '';
-  arr.forEach(m=>{
-    let isMe = normName(m.from)===normName(myUsername);
+  arr.forEach(m => {
+    let isMe = normName(m.from) === normName(myUsername);
     let div = document.createElement('div');
     div.className = isMe ? 'chat-msg-you' : 'chat-msg-other';
     div.innerHTML =
-      (!isMe && m.from ? `<div class="chat-msg-username">${m.from}</div>`:'') +
+      (!isMe && m.from ? `<div class="chat-msg-username">${m.from}</div>` : '') +
       `<span class="chat-msg-bubble">${m.content}</span>`;
     chatMsgs.appendChild(div);
   });
