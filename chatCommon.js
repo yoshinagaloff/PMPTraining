@@ -286,6 +286,7 @@ function getPrivateModeStateAndTime() {
   }
   return {state, time};
 }
+
 function renderChatMsgs() {
   let sel = chatToSelect.value;
   let {state: privateOn, time: privateTime} = getPrivateModeStateAndTime();
@@ -293,8 +294,11 @@ function renderChatMsgs() {
   if (sel === "__all__") {
     if (myUsername && !/^mentor_/i.test(myUsername) && privateOn && privateTime) {
       arr = allMsgs.filter(m =>
-        (m.t >= privateTime &&
-          ((m.from && /^mentor_/i.test(m.from)) || (m.content?.startsWith('[')))
+        m.t >= privateTime &&
+        (
+          (m.from && /^mentor_/i.test(m.from)) ||
+          normName(m.from) === normName(myUsername) ||
+          (m.content?.startsWith('[')) // hệ thống/thông báo
         )
       );
     } else {
@@ -319,6 +323,7 @@ function renderChatMsgs() {
   });
   chatMsgs.scrollTop = chatMsgs.scrollHeight;
 }
+
 chatToSelect.onchange = function() {
   showMentorBtn();
   renderChatMsgs();
