@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>PMP MOCK TEST - Question List</title>
+  <style>
+    body { background: #f4f4f4; font-size: 15px;}
+    .container {
+      max-width: 1100px; margin: 36px auto; background: #fff; border-radius: 18px;
+      box-shadow: 0 6px 32px rgba(0,0,0,0.08); padding: 18px 18px 20px 18px;
+    }
+    .icon-main { text-align:center; margin-bottom:10px;}
+    .icon-main svg { vertical-align:middle; width:34px; height:34px; margin-right:6px;}
+    .icon-main span { font-size:1.15em; vertical-align:middle;}
+    .title { font-size:1.23em; font-weight:bold; margin-bottom:8px; text-align:center; letter-spacing:0.01em;}
+    .section-title { font-size:1.09em; font-weight:bold; text-align:center; margin:16px 0 8px 0;}
+    .total-questions { font-size:1em; font-weight:bold; margin-top:18px; margin-bottom:8px;}
+    .total-questions span { color:#009688; text-decoration:underline; cursor:pointer;}
+    .filter-row { display:flex; gap:18px; flex-wrap: wrap; margin-bottom:12px;}
+    .filter-label { font-weight:bold; margin-right:2px; }
+    .filter-select { font-size:0.96em; padding:5px 13px; border-radius:6px; border:1.5px solid #bbb;}
+    .print-row { margin-bottom:0; margin-top:0; display:flex; flex-wrap:wrap; align-items:center; gap:8px;}
+    .print-btn {
+      background:#009688; color:#fff; border:none; border-radius:7px; font-size:1em; font-weight:600;
+      padding:9px 24px; margin:0 4px 0 0; cursor:pointer; transition:background 0.2s; display:inline-block;
+    }
+    .print-btn:hover { background:#1976d2; }
+    .start-btn {
+      background:#009688; color:#fff; border:none; border-radius:7px; font-size:1em; font-weight:600;
+      padding:10px 30px; margin:0 14px 0 0; cursor:pointer; transition:background 0.2s; display:inline-block;
+    }
+    .start-btn:before { content:'🚀 '; }
+    .start-btn:hover { background:#1976d2; }
+    .load-btn {
+      background:#ff9800; color:#fff; border:none; border-radius:7px; font-size:1em; font-weight:600;
+      padding:10px 30px; margin:0 0 0 0; cursor:pointer; transition:background 0.2s; display:inline-block;
+    }
+    .load-btn:before { content:'🔄 '; }
+    .load-btn:hover { background:#1976d2; }
+    .qtable { width:100%; border-collapse:collapse; margin-top:14px; border:2px solid #2196f3; font-size:1em;}
+    .qtable th, .qtable td { border:1.5px solid #2196f3; padding:10px 6px; text-align:left; font-size:1em;}
+    .qtable th { background:#e3f2fd; color:#1976d2; font-weight:bold; font-size:1em;}
+    .qtable .q-link { color:#1976d2; text-decoration:underline; cursor:pointer; font-weight:bold; font-size:1em;}
+    .qtable .q-link:hover { color:#0d47a1; }
+    .qtable td { background:#f5fbff;}
+    .qtable tr.data-row:nth-child(even) td { background:#e3f2fd;}
+    .qtable tr.data-row:hover td {
+      background: #bbdefb !important;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .qtable td.status { font-style:italic; font-size:1em; font-weight:bold;}
+    .status-correct { color:#43a047; }
+    .status-incorrect { color:#d32f2f; }
+    .status-unanswered { color:#757575; }
+    .difficulty-box {
+      display:inline-block; padding:4px 13px; border-radius:7px; min-width:69px; text-align:center;
+      font-weight:bold; font-size:1em; margin-left:6px;
+    }
+    .difficulty-Easy { background:#43a047; color:#fff; border:2px solid #388e3c;}
+    .difficulty-Moderate { background:#fbc02d; color:#fff; border:2px solid #f9a825;}
+    .difficulty-Difficult { background:#d32f2f; color:#fff; border:2px solid #b71c1c;}
+    .difficulty-Expert { background:#8e24aa; color:#fff; border:2px solid #6a1b9a; box-shadow:0 0 0 2px #ce93d8 inset;}
+    .action-row { text-align:center; margin-top:24px; }
+    .paging-row {
+      display: flex; align-items:center; justify-content: space-between;
+      margin: 22px 2px 0 2px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .pagination-controls {
+      display: flex; align-items:center; gap: 8px;
+    }
+    .pagination-page {
+      font-size:1.12em;
+      font-weight:bold;
+      color:#1976d2;
+      min-width:48px;
+      text-align:center;
+    }
+    .nav-btn, .first-btn, .last-btn {
+      padding:9px 15px; font-size:1.1em; border-radius:7px; border:none; font-weight:600; cursor:pointer; min-width:38px; margin-right:2px;
+    }
+    .nav-btn { background:#616161; color:#fff;}
+    .first-btn, .last-btn { background:#2196f3; color:#fff;}
+    .nav-btn:disabled, .first-btn:disabled, .last-btn:disabled { background:#bbb; color:#fff;}
+    @media (max-width: 700px) {
+      .container {padding:2vw;}
+      .title, .section-title {font-size:1em;}
+      .print-btn, .start-btn, .load-btn { font-size:0.96em; padding:7px 10vw;}
+      .qtable th, .qtable td {font-size:0.96em;padding:7px 3px;}
+      .filter-row { flex-direction: column; gap:8px; }
+      .paging-row { flex-direction:column; gap: 6px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="main-container">
+    <div class="icon-main" style="margin-top:14px;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#2b7cff"><circle cx="32" cy="32" r="30" stroke="#1976d2" stroke-width="4" fill="#e3f2fd"/><text x="32" y="42" text-anchor="middle" font-size="32" fill="#1976d2" font-family="Arial" font-weight="bold">?</text></svg>
+      <span>📚</span>
+    </div>
+    <div class="title">PMP MOCK TEST</div>
+    <div class="icon-main" style="margin-top:18px;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="28" stroke="#1976d2" stroke-width="4" fill="#e3f2fd"/>
+        <text x="32" y="41" text-anchor="middle" font-size="32" fill="#1976d2" font-family="Arial" font-weight="bold">✏️</text>
+      </svg>
+      <span>🎓</span>
+    </div>
+    <div class="section-title">QUESTION LIST</div>
+    <div id="test-area"></div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    let questions = [];
+    let filterDomain = "all";
+    let filterKA = "all";
+    let filterPG = "all";
+    let page = 1;
+    const PAGE_SIZE = 10;
+    function normalizeFields() {
+      for (let q of questions) {
+        if (!Array.isArray(q.domain)) {
+          if (!q.domain) q.domain = [];
+          else q.domain = q.domain.split(/[\/,]/).map(s=>s.trim()).filter(s=>s.length);
+        }
+        if (!Array.isArray(q.pmbok6_knowledge_area)) {
+          if (!q.pmbok6_knowledge_area) q.pmbok6_knowledge_area = [];
+          else q.pmbok6_knowledge_area = q.pmbok6_knowledge_area.split(/[\/,]/).map(s=>s.trim()).filter(s=>s.length);
+        }
+        if (!Array.isArray(q.pmbok6_process_group)) {
+          if (!q.pmbok6_process_group) q.pmbok6_process_group = [];
+          else q.pmbok6_process_group = q.pmbok6_process_group.split(/[\/,]/).map(s=>s.trim()).filter(s=>s.length);
+        }
+      }
+    }
+    function getUnique(field) {
+      let all = [];
+      for (let q of questions) if (Array.isArray(q[field])) all.push(...q[field]);
+      return [...new Set(all)];
+    }
+    function difficultyBox(level) {
+      if (!level) level = "Moderate";
+      let txt = String(level).charAt(0).toUpperCase() + String(level).slice(1).toLowerCase();
+      let className = "difficulty-" + txt;
+      return `<span class="difficulty-box ${className}">${txt}</span>`;
+    }
+    function statusCell(idx, q) {
+      let userAnswers = JSON.parse(localStorage.getItem('pmp_userAnswers')||"[]");
+      let answer = userAnswers[idx];
+      let multiCount = 1;
+      let lower = q.question ? q.question.toLowerCase() : "";
+      let mc = lower.match(/choose\s+(two|three|four|five|\d+|all)/) ||
+               lower.match(/select\s+(two|three|four|five|\d+|all)/) ||
+               lower.match(/(pick|mark)\s+(two|three|four|five|\d+|all)/);
+      if (mc) {
+        let val = mc[1] || mc[2];
+        if (val === "two") multiCount = 2;
+        else if (val === "three") multiCount = 3;
+        else if (val === "four") multiCount = 4;
+        else if (val === "five") multiCount = 5;
+        else if (val === "all") multiCount = q.options ? q.options.length : 2;
+        else if (!isNaN(val)) multiCount = Number(val);
+      }
+      if (answer == null || (Array.isArray(answer) && answer.length === 0)) {
+        return `<span class="status status-unanswered">Not answered</span>`;
+      }
+      let correct = (multiCount > 1 && Array.isArray(q.correct)) ? q.correct : [q.correct];
+      let chosen = (multiCount > 1) ? (Array.isArray(answer) ? answer : []) : [answer];
+      let isCorrect = false;
+      if (multiCount > 1) {
+        isCorrect = Array.isArray(q.correct) && chosen.length === q.correct.length &&
+          q.correct.every(idx=>chosen.includes(idx));
+      } else {
+        isCorrect = chosen[0] === correct[0];
+      }
+      if (isCorrect) {
+        return `<span class="status status-correct">CORRECT</span>`;
+      } else {
+        return `<span class="status status-incorrect">INCORRECT</span>`;
+      }
+    }
+    function renderListPage() {
+      let filteredQuestions = questions;
+      if (filterDomain !== "all") {
+        filteredQuestions = filteredQuestions.filter(q => Array.isArray(q.domain) && q.domain.includes(filterDomain));
+      }
+      if (filterKA !== "all") {
+        filteredQuestions = filteredQuestions.filter(q => Array.isArray(q.pmbok6_knowledge_area) && q.pmbok6_knowledge_area.includes(filterKA));
+      }
+      if (filterPG !== "all") {
+        filteredQuestions = filteredQuestions.filter(q => Array.isArray(q.pmbok6_process_group) && q.pmbok6_process_group.includes(filterPG));
+      }
+      let totalPages = Math.max(1, Math.ceil(filteredQuestions.length / PAGE_SIZE));
+      if(page < 1) page = 1;
+      if(page > totalPages) page = totalPages;
+      let start = (page-1)*PAGE_SIZE;
+      let end = Math.min(filteredQuestions.length, page*PAGE_SIZE);
+
+      let html = `
+      <div class="total-questions">Total questions: <span>${filteredQuestions.length}</span></div>
+      <div class="filter-row">
+        <div>
+          <span class="filter-label">Filter by domain:</span>
+          <select id="domain-filter" class="filter-select">
+            <option value="all">-- All domains --</option>
+            ${getUnique("domain").map(domain=>`<option value="${domain}" ${filterDomain===domain?'selected':''}>${domain}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <span class="filter-label">Filter by knowledge area:</span>
+          <select id="ka-filter" class="filter-select">
+            <option value="all">-- All knowledge areas --</option>
+            ${getUnique("pmbok6_knowledge_area").map(ka=>`<option value="${ka}" ${filterKA===ka?'selected':''}>${ka}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <span class="filter-label">Filter by process group:</span>
+          <select id="pg-filter" class="filter-select">
+            <option value="all">-- All process groups --</option>
+            ${getUnique("pmbok6_process_group").map(pg=>`<option value="${pg}" ${filterPG===pg?'selected':''}>${pg}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="print-row">
+        <button class="print-btn" onclick="printQuestionsOnly()">Print Question Only (PDF)</button>
+        <button class="print-btn" onclick="printFull()">Print Full (PDF)</button>
+      </div>
+      <table class="qtable">
+          <tr>
+              <th>Question#</th>
+              <th>Summary</th>
+              <th>Domain</th>
+              <th>Knowledge area</th>
+              <th>Process group</th>
+              <th>Difficulty</th>
+              <th>Status</th>
+          </tr>`;
+      for (let i = start; i < end; i++) {
+        let q = filteredQuestions[i];
+        let indexOrigin = questions.indexOf(q);
+        html += `<tr class="data-row">
+            <td><span class="q-link" onclick="gotoQuestion(${indexOrigin})">Question#${indexOrigin + 1}</span></td>
+            <td>${q.short}</td>
+            <td>${(q.domain||[]).join(" / ")}</td>
+            <td>${(q.pmbok6_knowledge_area||[]).join(" / ")}</td>
+            <td>${(q.pmbok6_process_group||[]).join(" / ")}</td>
+            <td>${difficultyBox(q.difficulty)}</td>
+            <td>${statusCell(indexOrigin, q)}</td>
+        </tr>`;
+      }
+      html += `</table>`;
+      html += `
+      <div class="paging-row">
+        <div class="pagination-controls">
+          <button class="first-btn" onclick="gotoPage(1)" ${page===1 ? "disabled" : ""}>&laquo;</button>
+          <button class="nav-btn" onclick="gotoPage(${page-1})" ${page===1 ? "disabled" : ""}>&lt;</button>
+          <span class="pagination-page">${page} / ${totalPages}</span>
+          <button class="nav-btn" onclick="gotoPage(${page+1})" ${page===totalPages ? "disabled" : ""}>&gt;</button>
+          <button class="last-btn" onclick="gotoPage(${totalPages})" ${page===totalPages ? "disabled" : ""}>&raquo;</button>
+        </div>
+        <div>
+          <button class="start-btn" onclick="gotoQuestion(0)">Start Test!</button>
+          <button class="load-btn" onclick="showUploadPage()">Load new test</button>
+        </div>
+      </div>
+      `;
+      document.getElementById('test-area').innerHTML = html;
+      document.getElementById("domain-filter").onchange = function() {
+        filterDomain = this.value;
+        page = 1;
+        renderListPage();
+      };
+      document.getElementById("ka-filter").onchange = function() {
+        filterKA = this.value;
+        page = 1;
+        renderListPage();
+      };
+      document.getElementById("pg-filter").onchange = function() {
+        filterPG = this.value;
+        page = 1;
+        renderListPage();
+      };
+    }
+    function gotoQuestion(idx) {
+      localStorage.setItem('pmp_current_idx', idx);
+      window.location.href = "question.html";
+    }
+    function showUploadPage() {
+      localStorage.removeItem('pmp_questions');
+      window.location.href = "index.html";
+    }
+    function gotoPage(p) {
+      page = p;
+      renderListPage();
+    }
+
+    function printQuestionsOnly() {
+      let questions = JSON.parse(localStorage.getItem('pmp_questions')||"[]");
+      if (!questions.length) return;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+      doc.setFont('times', '');
+      doc.setFontSize(15);
+      doc.setTextColor(33,33,33);
+      doc.text("PMP MOCK TEST - Questions Only", 20, 20);
+      doc.setFontSize(11);
+      let y = 30;
+      let marginL = 20, lineH = 6, pageH = 287;
+      questions.forEach((q, idx) => {
+        doc.setFontSize(13);
+        doc.setTextColor(33,80,180);
+        doc.text(`Question#${idx+1}:`, marginL, y);
+        doc.setFontSize(11);
+        doc.setTextColor(199,120,0);
+        doc.text(` [${q.difficulty||"Moderate"}]`, marginL+40, y);
+        y+=lineH;
+        doc.setTextColor(33,33,33);
+        // KHÔNG IN Summary
+        let lines = doc.splitTextToSize(q.question, 170);
+        for (let l=0; l<lines.length; l++) {
+          if (y > pageH-lineH) { doc.addPage(); doc.setFont('times',''); y = 20; }
+          doc.text(lines[l], marginL, y);
+          y += lineH;
+        }
+        q.options.forEach((opt, i) => {
+          let optStr = `${String.fromCharCode(65+i)}. ${opt}`;
+          let optLines = doc.splitTextToSize(optStr, 160);
+          for (let l=0; l<optLines.length; l++) {
+            if (y > pageH-lineH) { doc.addPage(); doc.setFont('times',''); y = 20; }
+            doc.text(optLines[l], marginL+4, y);
+            y += lineH;
+          }
+        });
+        y += 2;
+        if (y > pageH-lineH) { doc.addPage(); doc.setFont('times',''); y = 20; }
+      });
+      doc.save("PMP_Questions_Only.pdf");
+    }
+	
+	function printFull() {
+    if (!questions.length) return;
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const marginLR = 15;
+    const marginTop = 10;
+    const pdfWidth = pageWidth - marginLR * 2;
+    let y = marginTop;
+
+    let i = 0;
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(17); // Đầu trang to vừa phải
+    pdf.text("PMP MOCK TEST - Full Content", pageWidth / 2, marginTop + 8, { align: "center" });
+    y = marginTop + 18;
+
+    function renderQuestionToCanvas(q, idx, cb) {
+        let pdfDiv = document.createElement("div");
+        // Font-size nhỏ hơn, giống print question only
+        pdfDiv.setAttribute('style', 'width:624px;background:#fff;color:#222;position:fixed;left:-9999px;top:0;z-index:-1;padding:0;');
+        pdfDiv.innerHTML = `<div class="pdf-main" style="font-size: 11px; color: #222 !important; background: #fff !important;">
+            <div class="pdf-question">
+                <span class="pdf-qnum" style="color:#1976d2;font-weight:bold;">Question#${idx+1}:</span>
+                <span class="pdf-difficulty" style="color:#fbc02d;font-weight:bold;"> [${q.difficulty}]</span>
+                <div class="pdf-question-text">${q.question.replace(/\n/g,'<br>')}</div>
+                <div class="pdf-options">
+                    ${q.options.map((opt,i)=>`<div class="pdf-option">${String.fromCharCode(65+i)}. ${opt}${i===q.correct ? '<span style="color:#388e3c;font-weight:bold;"> [Correct]</span>':''}</div>`).join('')}
+                </div>
+                ${q.reference ? `<div class="pdf-reference" style="color:#6a1b9a;background:#ede7f6;font-family:'Courier New',Courier,monospace;padding:4px 8px;border-radius:5px;display:inline-block;margin-top:7px;margin-bottom:7px;">Reference: ${q.reference.replace(/\n/g,'<br>')}</div>` : ''}
+                ${q.explanation_en ? `<span class="pdf-explanation-en" style="font-style:italic;color:#1976d2;margin-top:7px;margin-bottom:7px;display:block;">Explain EN: ${q.explanation_en.replace(/\n/g,'<br>')}</span>` : ''}
+                ${q.explanation_vi ? `<span class="pdf-explanation-vi" style="margin-bottom:7px;margin-top:7px;display:block;">Explain VI: ${q.explanation_vi.replace(/\n/g,'<br>')}</span>` : ''}
+            </div>
+        </div>`;
+        document.body.appendChild(pdfDiv);
+        html2canvas(pdfDiv, {scale:2, width:624, windowWidth:624, background:'#fff'}).then(canvas => {
+            document.body.removeChild(pdfDiv);
+            cb(canvas);
+        });
+    }
+
+    function nextQuestion() {
+        if (i < questions.length) {
+            renderQuestionToCanvas(questions[i], i, function(canvas) {
+                const imgData = canvas.toDataURL('image/png');
+                let imgPixelHeight = canvas.height;
+                let imgPixelWidth = canvas.width;
+                let imgPdfHeight = (imgPixelHeight * pdfWidth) / imgPixelWidth;
+
+                // Luôn addPage mới cho mỗi câu hỏi (trừ câu đầu)
+                if (i > 0) {
+                    pdf.addPage();
+                    y = marginTop;
+                }
+                pdf.addImage(imgData, 'PNG', marginLR, y, pdfWidth, imgPdfHeight);
+                y += imgPdfHeight + 2;
+                i++;
+                nextQuestion();
+            });
+        } else {
+            pdf.save('PMP_Full.pdf');
+        }
+    }
+    nextQuestion();
+}
+    
+
+    
+    window.onload = function() {
+      let raw = localStorage.getItem('pmp_questions');
+      if (!raw) {
+        window.location.href = "index.html";
+        return;
+      }
+      questions = JSON.parse(raw);
+      normalizeFields();
+      renderListPage();
+    };
+  </script>
+    <!-- jsPDF + html2canvas CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</body>
+</html>	

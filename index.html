@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PMP MOCK TEST - Load file</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container" id="main-container">
+    <div class="icon-main">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#2b7cff">
+        <circle cx="32" cy="32" r="30" stroke="#1976d2" stroke-width="4" fill="#e3f2fd"/>
+        <text x="32" y="42" text-anchor="middle" font-size="32" fill="#1976d2" font-family="Arial" font-weight="bold">?</text>
+      </svg>
+      <span>📚</span>
+    </div>
+    <div class="title">PMP MOCK TEST</div>
+    <input type="file" id="upload" accept=".enc,.json">
+    <div id="decrypt-area"></div>
+    <div id="expire-msg" style="margin-top:18px;font-size:1.1em;color:#c62828;font-weight:bold;"></div>
+  </div>
+  <script>
+    // Convert base64 to Uint8Array
+    function base64ToBytes(str) {
+      let binary = atob(str);
+      let bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes;
+    }
+    // AES-GCM Decrypt
+    async function decryptAesGcm(encObj, password) {
+      let salt = base64ToBytes(encObj.salt);
+      let iv = base64ToBytes(encObj.iv);
+      let tag = base64ToBytes(encObj.tag);
+      let ciphertext = base64ToBytes(encObj.ciphertext);
+
+      let enc = new TextEncoder();
+      let keyMaterial = await window.crypto.subtle.importKey(
+        "raw", enc.encode(password), "PBKDF2", false, ["deriveBits", "deriveKey"]
+      );
+      let key = await window.crypto.subtle.deriveKey(
+        {
+          name: "PBKDF2",
+          salt: salt,
+          iterations: 200000,
+          hash: "SHA-256",
+        },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["decrypt"]
+      );
+      // Concatenate ciphertext and tag (tag is last 16 bytes)
+      let cipherAndTag = new Uint8Array(ciphertext.length + tag.length);
+      cipherAndTag.set(ciphertext, 0);
+      cipherAndTag.set(tag, ciphertext.length);
+
+      try {
+        let decrypted = await window.crypto.subtle.decrypt(
+          {
+            name: "AES-GCM",
+            iv: iv,
+            tagLength: 128,
+          },
+          key,
+          cipherAndTag
+        );
+        return new TextDecoder().decode(decrypted);
+      } catch (e) {
+        throw new Error("Incorrect password. Please try again or contact admin.");
+      }
+    }
+
+    document.getElementById('upload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async function(evt) {
+        let raw = evt.target.result;
+        let encObj;
+        try {
+          encObj = JSON.parse(raw);
+        } catch (e) {
+          alert("File format is not valid!");
+          return;
+        }
+        // Show password input
+        let decryptArea = document.getElementById('decrypt-area');
+        let expireMsg = document.getElementById('expire-msg');
+        decryptArea.innerHTML = `
+          <div style="margin-top:18px;">
+            <label for="password"><b>Enter password:</b></label>
+            <input type="password" id="password" style="font-size:1.2em;margin:4px 8px;">
+            <button id="btn-decrypt" style="font-size:1.1em;padding:5px 20px;">Confirm &amp; Load File</button>
+            <span id="decrypt-status" style="margin-left:12px;color:red;"></span>
+          </div>
+        `;
+        expireMsg.textContent = "";
+        document.getElementById('btn-decrypt').onclick = async function() {
+          let pwd = document.getElementById('password').value;
+          let status = document.getElementById('decrypt-status');
+          status.textContent = "";
+          expireMsg.textContent = "";
+          if (!pwd) { status.textContent = "Please enter password."; return; }
+          status.textContent = "Decrypting...";
+          try {
+            let plaintext = await decryptAesGcm(encObj, pwd);
+            // Check expire date if exists
+            let parsed;
+            try {
+              parsed = JSON.parse(plaintext);
+            } catch (e) {
+              // If not JSON, just proceed as before
+              localStorage.setItem('pmp_questions', plaintext);
+              status.style.color = "green";
+              status.textContent = "Success! Loading file ...";
+              setTimeout(function() {
+                window.location.href = "questionsList.html";
+              }, 800);
+              return;
+            }
+            if (parsed && typeof parsed === "object" && parsed.expire_date) {
+              // Show expire date
+              let expireDateStr = parsed.expire_date;
+              let expireDate = new Date(expireDateStr + "T23:59:59");
+              let today = new Date();
+              expireMsg.textContent = "Expire date: " + expireDateStr;
+              if (today > expireDate) {
+                status.style.color = "red";
+                status.textContent = "";
+                expireMsg.textContent = "File expired since " + expireDateStr + ".";
+                return; // Do NOT load file
+              }
+            }
+            // If not expired, load as usual
+            localStorage.setItem('pmp_questions', plaintext);
+            status.style.color = "green";
+            status.textContent = "Success! Loading file ...";
+            setTimeout(function() {
+              window.location.href = "questionsList.html";
+            }, 800);
+          } catch (err) {
+            status.style.color = "red";
+            status.textContent = "Incorrect password. Please try again or contact admin.";
+          }
+        };
+      };
+      reader.readAsText(file);
+    });
+  </script>
+</body>
+</html>

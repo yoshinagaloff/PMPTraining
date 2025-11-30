@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PMP MOCK TEST - Result</title>
+  <style>
+    body { background:#f4f4f4; font-size:15px;}
+    .container {
+      max-width:540px; margin:38px auto 0 auto; background:#fff; border-radius:18px; box-shadow:0 6px 32px rgba(0,0,0,0.08);
+      padding:18px 18px 45px 18px; text-align:center;
+    }
+    .icon-main { text-align:center; margin-bottom:10px; }
+    .icon-main svg { vertical-align:middle; width:34px; height:34px; margin-right:10px;}
+    .icon-main span { font-size:1.1em; vertical-align:middle; }
+    .icon-sub {text-align:center; margin:10px 0 16px 0;}
+    .icon-sub svg { width:28px; height:28px; margin-right:10px;}
+    .icon-sub span { font-size:1.6em; vertical-align:middle;}
+    .title { font-size:1.23em; font-weight:bold; margin-bottom:0px; text-align:center; letter-spacing:0.01em; }
+    .result-label { font-size:1.04em; margin:16px 0 10px 0; font-weight:400; }
+    .result-table {
+      margin: 0 auto 18px auto;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    .result-table th, .result-table td {
+      border: 1.5px solid #2196f3;
+      padding: 7px 8px;
+      font-size: 1em;
+      text-align: left;
+    }
+    .result-table th {
+      background: #e3f2fd;
+      color: #1976d2;
+      font-weight: bold;
+      text-align: left;
+    }
+    .result-table td.status { font-weight: bold; text-align: center;}
+    .result-table td.status.incorrect { color: #d32f2f; }
+    .result-table td.status.correct { color: #43a047; }
+    .result-table td.user.nochoice { color: #888; font-style: italic; font-family: Arial, sans-serif;}
+    .result-table td.user.multichoice { font-family: Arial, sans-serif; }
+    .result-table td.correct.multichoice { font-family: Arial, sans-serif; }
+    .correct-count-row {
+      font-size: 1.08em;
+      margin: 18px 0 12px 0;
+      text-align: center;
+      font-weight: bold;
+    }
+    .correct-number { color: #43a047; font-weight: bold; font-size: 1.08em;}
+    .btn-row {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .restart-btn {
+      background: #d32f2f;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1em;
+      font-weight: 600;
+      padding: 10px 28px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .restart-btn:hover { background:#a31515;}
+    .back-btn {
+      background: #388e3c;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 1em;
+      font-weight: 600;
+      padding: 10px 28px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .back-btn:hover { background:#145a16;}
+    .copyright-row {
+      margin-top:28px;
+      font-size:0.93em;
+      color:#888;
+      text-align:center;
+      font-style:italic;
+      letter-spacing:0.01em;
+    }
+    @media (max-width: 650px){
+      .container{max-width:99vw; padding:2vw;}
+      .result-table th, .result-table td {font-size:0.97em;}
+      .restart-btn, .back-btn {font-size:0.97em; padding:9px 7vw;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon-main">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" stroke="#1976d2" stroke-width="4" fill="#e3f2fd"/><text x="32" y="41" text-anchor="middle" font-size="32" fill="#1976d2" font-family="Arial" font-weight="bold">?</text></svg>
+      <span>📚</span>
+    </div>
+    <div class="title">PMP MOCK TEST</div>
+    <div class="icon-sub">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="28" height="28"><circle cx="32" cy="32" r="28" fill="#ffeb3b" stroke="#fbc02d" stroke-width="3"/><text x="32" y="43" text-anchor="middle" font-size="32" fill="#d32f2f" font-family="Arial" font-weight="bold">🏆</text></svg>
+      <span>🎓</span>
+    </div>
+    <div class="result-label">Your result:</div>
+    <table class="result-table" id="result-table">
+      <tr>
+        <th>Question#</th>
+        <th>Your choice</th>
+        <th>Correct answer</th>
+        <th>Result</th>
+      </tr>
+    </table>
+    <div class="correct-count-row" id="correct-count-row"></div>
+    <div class="btn-row">
+      <button class="restart-btn" onclick="restartTest()">Restart</button>
+      <button class="back-btn" onclick="backToList()">Back to list</button>
+    </div>
+    <div class="copyright-row">
+      Tool by Nguyễn Thanh Dũng (Yoshinaga Yuta). All rights reserved.
+    </div>
+  </div>
+  <script>
+    function getMultiCount(text, options) {
+      let lower = text ? text.toLowerCase() : "";
+      let m = lower.match(/choose\s+(two|three|four|five|\d+|all)/) ||
+              lower.match(/select\s+(two|three|four|five|\d+|all)/) ||
+              lower.match(/(pick|mark)\s+(two|three|four|five|\d+|all)/);
+      if (m) {
+        let val = m[1] || m[2];
+        if (val === "two") return 2;
+        if (val === "three") return 3;
+        if (val === "four") return 4;
+        if (val === "five") return 5;
+        if (val === "all") return options ? options.length : 2;
+        if (!isNaN(val)) return Number(val);
+      }
+      return 1;
+    }
+    function restartTest() {
+      localStorage.removeItem('pmp_userAnswers');
+      localStorage.removeItem('pmp_checked');
+      window.location.href = "index.html";
+    }
+    function backToList() {
+      window.location.href = "questionsList.html";
+    }
+    window.onload = function() {
+      let questions = JSON.parse(localStorage.getItem('pmp_questions')||"[]");
+      let userAnswers = JSON.parse(localStorage.getItem('pmp_userAnswers')||"[]");
+      let correctCount = 0;
+      let table = document.getElementById('result-table');
+      for(let i=0;i<questions.length;i++){
+        let q = questions[i];
+        let multiCount = getMultiCount(q.question, q.options);
+        let user, statusClass, statusText, correct;
+        if (multiCount > 1 && Array.isArray(q.correct)) {
+          correct = q.correct.map(idx=>String.fromCharCode(65+idx)).join(", ");
+        } else {
+          correct = String.fromCharCode(65+q.correct);
+        }
+        if (multiCount > 1) {
+          if (!Array.isArray(userAnswers[i]) || userAnswers[i].length === 0) {
+            user = `<span class="nochoice" style="color:#888;font-style:italic;">(No choice)</span>`;
+          } else {
+            user = userAnswers[i].map(idx=>String.fromCharCode(65+idx)).join(", ");
+          }
+        } else {
+          if (userAnswers[i]==null) {
+            user = `<span class="nochoice" style="color:#888;font-style:italic;">(No choice)</span>`;
+          } else {
+            user = String.fromCharCode(65+userAnswers[i]);
+          }
+        }
+        // Đánh giá đúng/sai
+        if (multiCount > 1) {
+          if (!Array.isArray(userAnswers[i]) || userAnswers[i].length !== (Array.isArray(q.correct)?q.correct.length:0)) {
+            statusClass = "incorrect";
+            statusText = "INCORRECT";
+          } else {
+            let correctArr = Array.isArray(q.correct)?q.correct:[q.correct];
+            let userArr = userAnswers[i];
+            let ok = correctArr.length === userArr.length && correctArr.every(idx=>userArr.includes(idx));
+            if (ok) {
+              statusClass = "correct";
+              statusText = "CORRECT";
+              correctCount++;
+            } else {
+              statusClass = "incorrect";
+              statusText = "INCORRECT";
+            }
+          }
+        } else {
+          if (userAnswers[i]===q.correct) {
+            statusClass = "correct";
+            statusText = "CORRECT";
+            correctCount++;
+          } else {
+            statusClass = "incorrect";
+            statusText = "INCORRECT";
+          }
+        }
+        table.innerHTML += `<tr>
+          <td>Question#${i+1}</td>
+          <td class="user${multiCount>1?' multichoice':''}${(multiCount>1?(userAnswers[i]==null||userAnswers[i].length==0):userAnswers[i]==null)?' nochoice':''}">${user}</td>
+          <td class="correct${multiCount>1?' multichoice':''}">${correct}</td>
+          <td class="status ${statusClass}">${statusText}</td>
+        </tr>`;
+      }
+      document.getElementById('correct-count-row').innerHTML = `Correct answers: <span class="correct-number">${correctCount}</span> / <b>${questions.length}</b>`;
+    };
+  </script>
+</body>
+</html>
