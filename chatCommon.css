@@ -28,11 +28,19 @@
 #chat-privatemsg {
   display:none;
   background:#ffd54f;color:#333;border:none;
-  border-radius:6px;padding:4px 10px;font-size:0.95em;font-weight:600;
-  margin-right:8px;cursor:pointer;transition:background .18s,color .18s;
+  border-radius:6px;padding:4px 10px;
+  font-size:0.95em;font-weight:600;
+  margin-right:8px;cursor:pointer;transition:background .18s,color .18s,opacity .18s;
+  opacity: 1;
+  pointer-events:auto;
 }
 #chat-privatemsg.active {
   background:#ff9800 !important;color:#fff !important;
+}
+#chat-privatemsg:disabled, #chat-privatemsg.disabled {
+  opacity:0.5 !important;
+  pointer-events:none !important;
+  filter: grayscale(60%);
 }
 #chat-login-area,#chat-main-area {padding:13px 14px 10px 14px;}
 #chat-login-area label {display:block;margin:7px 0 3px 0;}

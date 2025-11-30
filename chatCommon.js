@@ -154,23 +154,33 @@ chatLoginBtn.onclick = function() {
     mentorFilterActive = false;
     mentorFilterTime = null;
     showMentorBtn();
+    updatePrivMsgBtnState(); // Đảm bảo trạng thái khi login
   });
 };
 
-// Nút toggle chỉ hiện khi đã login Mentor_
+// Nút toggle chỉ hiện khi đã login Mentor_ VÀ đang chọn nhóm chung
 function showMentorBtn() {
-  if(/^mentor_/i.test(myUsername)) {
+  if(/^mentor_/i.test(myUsername) && chatToSelect.value==="__all__") {
     chatPrivMsgBtn.style.display = 'inline-block';
-    updateMentorBtnState();
+    chatPrivMsgBtn.disabled = false;
+    chatPrivMsgBtn.classList.remove('disabled');
+    updatePrivMsgBtnState();
+  } else if(/^mentor_/i.test(myUsername)) {
+    chatPrivMsgBtn.style.display = 'inline-block';
+    chatPrivMsgBtn.disabled = true;
+    chatPrivMsgBtn.classList.add('disabled');
   } else {
     chatPrivMsgBtn.style.display = 'none';
     chatPrivMsgBtn.classList.remove('active');
     chatPrivMsgBtn.textContent = 'PrivateMsgMentor';
     chatPrivMsgBtn.style.background = '';
     chatPrivMsgBtn.style.color = '';
+    chatPrivMsgBtn.disabled = true;
+    chatPrivMsgBtn.classList.add('disabled');
   }
 }
-function updateMentorBtnState() {
+
+function updatePrivMsgBtnState() {
   if (mentorFilterActive) {
     chatPrivMsgBtn.classList.add('active');
     chatPrivMsgBtn.style.background = '#ff9800';
@@ -184,10 +194,15 @@ function updateMentorBtnState() {
   }
 }
 
-// Toggle logic
+chatToSelect.onchange = function() {
+  showMentorBtn();
+  renderChatMsgs();
+};
+
 chatPrivMsgBtn.onclick = function() {
+  if (chatPrivMsgBtn.disabled) return;
   mentorFilterActive = !mentorFilterActive;
-  updateMentorBtnState();
+  updatePrivMsgBtnState();
   if (mentorFilterActive) {
     mentorFilterTime = Date.now();
     db.ref('pmpchat/msgs').push({
@@ -299,7 +314,10 @@ function renderChatMsgs() {
   });
   chatMsgs.scrollTop = chatMsgs.scrollHeight;
 }
-chatToSelect.onchange = renderChatMsgs;
+chatToSelect.onchange = function() {
+  showMentorBtn();
+  renderChatMsgs();
+};
 window.addEventListener('beforeunload', function() {
   if (myUsername && userRef) userRef.remove();
 });
