@@ -206,7 +206,7 @@ chatPrivMsgBtn.onclick = function() {
     db.ref('pmpchat/msgs').push({
       from: myUsername,
       to: "__all__",
-      content: "[Mentor đã bật chế độ PrivateMsgMentor. Các user khác sẽ chỉ thấy tin nhắn Mentor_ từ thời điểm này.]",
+      content: "[Mentor đã bật chế độ PrivateMsgMentor. Các user khác sẽ chỉ thấy tin nhắn Mentor_ và của chính mình từ thời điểm này.]",
       t: mentorFilterTime,
       mentorFilterActive: true,
       mentorFilterTime: mentorFilterTime
@@ -286,7 +286,6 @@ function getPrivateModeStateAndTime() {
   }
   return {state, time};
 }
-
 function renderChatMsgs() {
   let sel = chatToSelect.value;
   let {state: privateOn, time: privateTime} = getPrivateModeStateAndTime();
@@ -298,7 +297,7 @@ function renderChatMsgs() {
         (
           (m.from && /^mentor_/i.test(m.from)) ||
           normName(m.from) === normName(myUsername) ||
-          (m.content?.startsWith('[')) // hệ thống/thông báo
+          (m.content?.startsWith('['))
         )
       );
     } else {
@@ -323,7 +322,6 @@ function renderChatMsgs() {
   });
   chatMsgs.scrollTop = chatMsgs.scrollHeight;
 }
-
 chatToSelect.onchange = function() {
   showMentorBtn();
   renderChatMsgs();
